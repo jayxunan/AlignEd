@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('submit-feedback/<int:assessment_id>/', views.submit_feedback_view, name='submit_feedback'),
+    path('create-admin/', views.create_admin),
 
     # --- Student-Facing URLs ---
     path('', views.dashboard_view, name='dashboard'),
