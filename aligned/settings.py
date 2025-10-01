@@ -14,10 +14,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "aligned.onrender.com").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS", "https://aligned.onrender.com"
+).split(",")
+
 if CSRF_TRUSTED_ORIGINS == [""]:
     CSRF_TRUSTED_ORIGINS = []
+
+# HTTPS behind proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # -------------------
 # Applications
@@ -68,8 +74,7 @@ WSGI_APPLICATION = 'aligned.wsgi.application'
 # -------------------
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-        conn_max_age=600,
+        default=os.environ.get("DATABASE_URL")
     )
 }
 
