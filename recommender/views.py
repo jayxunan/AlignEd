@@ -17,6 +17,8 @@ import os
 from .models import Assessment, Course
 from . import train_model
 import json
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
 
 # (Your COURSE_PERSONAS and helper functions remain the same)
 COURSE_PERSONAS = {
@@ -110,6 +112,13 @@ def recommendation_view(request):
             return render(request, 'recommender/error.html', {'error_message': f"An error occurred: {e}"})
     return redirect('assessment')
 
+def create_admin(request):
+    User = get_user_model()
+    if not User.objects.filter(username='alignedadmin').exists():
+        User.objects.create_superuser('alignedadmin', 'gyulfreak@gmail.com', 'y23adr4amnw0')
+        return HttpResponse("Superuser created")
+    return HttpResponse("Superuser already exists")
+    
 # --- NEW: AJAX-BASED FEEDBACK VIEW ---
 def submit_feedback_view(request, assessment_id):
     if request.method == 'POST':
