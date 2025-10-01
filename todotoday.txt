@@ -1,0 +1,7 @@
+- fix admin login,
+- make student dashboard look more lively, more fun and not boring without changing the functions
+- make the trending courses in the student dashboard have good visuals
+- make sidenav accessible for mobile devices
+- make courses that the admin adds to the database as the ones that the system recommend, not the hard coded courses
+- add other relevant analytics for the admin dashboard
+- also make other relevant analytics exportable for the admin, both csv and pdf (there could be graphs if possible)
