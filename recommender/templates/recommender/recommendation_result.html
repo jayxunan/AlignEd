@@ -1,0 +1,173 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}Your Recommendations | AlignEd AI{% endblock %}
+
+{% block content %}
+<!-- Add Chart.js library for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    /* Styling for the star rating feedback system */
+    .star-rating input[type="radio"] { display: none; }
+    .star-rating label { font-size: 2rem; color: #d1d5db; cursor: pointer; transition: color 0.2s; }
+    /* This handles the hover and checked states to color the stars */
+    .star-rating:not(.is-disabled):not(:hover) input:checked ~ label,
+    .star-rating:not(.is-disabled):hover input ~ label:hover,
+    .star-rating:not(.is-disabled):hover input ~ label:hover ~ label { color: #f59e0b; }
+    /* This class is added by JavaScript after a rating is submitted */
+    .star-rating.is-disabled label { cursor: default; color: #f59e0b !important; opacity: 0.6; }
+</style>
+
+<div class="max-w-5xl mx-auto text-center">
+    <div class="inline-block bg-green-100 p-4 rounded-full mb-4">
+        <i data-feather="award" class="w-10 h-10 text-green-600"></i>
+    </div>
+    <h1 class="text-4xl font-bold text-gray-800">Here Are Your Personalized Recommendations!</h1>
+    <p class="text-lg text-gray-500 mt-3">We've analyzed your unique profile to find the courses that best match your talents and passions.</p>
+</div>
+
+<!-- Recommendations are NOT in a form anymore -->
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    {% for rec in recommendations %}
+    <!-- Main Recommendation Card -->
+    <div class="bg-white rounded-2xl shadow-lg flex flex-col h-full
+        {% if forloop.counter == 1 %} border-4 border-indigo-600 {% else %} border-4 border-transparent {% endif %}">
+        
+        <div class="p-6 text-center">
+            {% if forloop.counter == 1 %}
+            <div class="bg-indigo-600 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 inline-block">
+                🥇 Top Match
+            </div>
+            {% elif forloop.counter == 2 %}
+            <div class="bg-blue-100 text-blue-800 text-sm font-bold px-4 py-1 rounded-full mb-4 inline-block">
+                🥈 Great Alternative
+            </div>
+            {% else %}
+            <div class="bg-yellow-100 text-yellow-800 text-sm font-bold px-4 py-1 rounded-full mb-4 inline-block">
+                🥉 Also Consider
+            </div>
+            {% endif %}
+
+            <h2 class="text-2xl font-bold text-gray-900">{{ rec.course }}</h2>
+            <p class="text-gray-600 mt-2">Compatibility Score:</p>
+            <div class="text-5xl font-black text-indigo-600 my-2">{{ rec.match_score }}</div>
+        </div>
+
+        <!-- Visualization Section -->
+        <div class="px-4 py-6 bg-gray-50">
+            <h3 class="text-center font-bold text-gray-700 mb-2">Your Profile vs. Ideal Profile</h3>
+            <canvas id="chart-{{ forloop.counter }}" data-chart='{{ rec.insights.chart_data }}'></canvas>
+        </div>
+
+        <!-- In-Depth Insights Section -->
+        <div class="p-6 flex-grow">
+            <h3 class="font-bold text-lg text-gray-800 mb-3">Why it's a good fit:</h3>
+            <ul class="space-y-2 mb-6">
+                {% for strength in rec.insights.strengths %}
+                <li class="flex items-start">
+                    <i data-feather="check-circle" class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-600 text-sm">{% autoescape off %}{{ strength|safe }}{% endautoescape %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if rec.insights.growth %}
+            <h3 class="font-bold text-lg text-gray-800 mb-3">What you can improve:</h3>
+            <ul class="space-y-2">
+                {% for growth in rec.insights.growth %}
+                <li class="flex items-start">
+                    <i data-feather="arrow-up-circle" class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5"></i>
+                    <span class="text-gray-600 text-sm">{% autoescape off %}{{ growth|safe }}{% endautoescape %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <!-- Auto-Submitting Feedback Section -->
+        <div class="p-6 border-t bg-gray-50 rounded-b-2xl">
+            <h4 class="font-bold text-center text-gray-600 mb-2">How accurate is this recommendation?</h4>
+            <div class="star-rating flex justify-center flex-row-reverse" data-rec-number="{{ forloop.counter }}">
+                <input type="radio" id="star5-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="5"><label for="star5-{{forloop.counter}}">★</label>
+                <input type="radio" id="star4-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="4"><label for="star4-{{forloop.counter}}">★</label>
+                <input type="radio" id="star3-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="3"><label for="star3-{{forloop.counter}}">★</label>
+                <input type="radio" id="star2-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="2"><label for="star2-{{forloop.counter}}">★</label>
+                <input type="radio" id="star1-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="1"><label for="star1-{{forloop.counter}}">★</label>
+            </div>
+            <p class="feedback-thanks text-center text-sm text-green-600 font-semibold mt-2" style="display: none;">Thanks for your feedback!</p>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-gray-500 col-span-3 text-center">We couldn't generate recommendations. Please try again.</p>
+    {% endfor %}
+</div>
+
+<!-- Button Section (outside the feedback form) -->
+<div class="text-center mt-12 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+    <a href="{% url 'dashboard' %}" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+        <i data-feather="home" class="inline-block w-4 h-4 mr-2"></i>Back to Home
+    </a>
+    <a href="{% url 'assessment' %}" class="w-full sm:w-auto bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">
+        Take Assessment Again
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // (Your existing chart script)
+        document.querySelectorAll('canvas').forEach(canvas => {
+            const chartDataString = canvas.dataset.chart;
+            if (chartDataString && chartDataString !== 'None' && chartDataString !== 'null') {
+                try {
+                    const chartData = JSON.parse(chartDataString);
+                    new Chart(canvas, {
+                        type: 'radar',
+                        data: {
+                            labels: chartData.labels,
+                            datasets: [{ label: 'Your Profile', data: chartData.user_scores, backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: 'rgba(99, 102, 241, 1)', borderWidth: 2, }, { label: 'Ideal Profile', data: chartData.ideal_scores, backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 1)', borderWidth: 2, }]
+                        },
+                        options: { scales: { r: { beginAtZero: true, max: 5, ticks: { stepSize: 1, display: false }, pointLabels: { font: { size: 10 } } } }, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+                    });
+                } catch (e) { console.error("Failed to parse chart data:", e); }
+            }
+        });
+
+        // --- NEW: AUTO-SUBMIT FEEDBACK SCRIPT ---
+        const assessmentId = '{{ assessment_id }}';
+        const csrfToken = '{{ csrf_token }}';
+        
+        document.querySelectorAll('.star-rating').forEach(ratingGroup => {
+            ratingGroup.addEventListener('change', (event) => {
+                const rating = event.target.value;
+                const recNumber = ratingGroup.dataset.recNumber;
+                
+                ratingGroup.classList.add('is-disabled');
+                ratingGroup.querySelectorAll('input').forEach(input => input.disabled = true);
+
+                const thanksMessage = ratingGroup.nextElementSibling;
+                if (thanksMessage) {
+                    thanksMessage.style.display = 'block';
+                }
+
+                fetch(`/submit-feedback/${assessmentId}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken, },
+                    body: JSON.stringify({
+                        recommendation_number: parseInt(recNumber),
+                        rating: parseInt(rating)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== 'success') {
+                        console.error('Feedback submission failed:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+
+        feather.replace();
+    });
+</script>
+{% endblock %}
+

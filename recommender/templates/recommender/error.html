@@ -1,0 +1,21 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}An Error Occurred{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto text-center">
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-6 rounded-lg" role="alert">
+        <h1 class="text-2xl font-bold mb-2">Oops! Something went wrong.</h1>
+        <p class="font-semibold">An error occurred while generating your recommendations.</p>
+
+        <!-- This will display the specific error message from your view, which will help us debug -->
+        <p class="mt-4 text-sm bg-red-50 p-3 rounded text-left"><strong>Error Details:</strong> {{ error_message }}</p>
+    </div>
+
+    <div class="text-center mt-12">
+        <a href="{% url 'assessment' %}" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors">
+            Try the Assessment Again
+        </a>
+    </div>
+</div>
+{% endblock %}

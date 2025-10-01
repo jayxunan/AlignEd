@@ -1,0 +1,90 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}Start Your Discovery | AlignEd AI{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <div class="mb-8">
+        <div class="bg-gray-200 rounded-full h-2.5">
+            <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 20%; transition: width 0.3s ease-in-out;"></div>
+        </div>
+        <div id="step-counter" class="text-center text-sm text-gray-500 mt-2 font-medium">Step 1 of 5: About You</div>
+    </div>
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <form action="{% url 'recommendation_result' %}" method="POST">
+            {% csrf_token %}
+
+            <!-- Step 1: Personal Information -->
+            <div id="step-1">
+                <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">Let's Get Started!</h1><p class="text-gray-500 mt-2">Tell us a little bit about yourself.</p></div>
+                <div class="space-y-6 max-w-lg mx-auto">
+                    <div><label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name (Optional)</label><input type="text" id="name" name="name" placeholder="Juan dela Cruz" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                    <div><label for="school" class="block text-sm font-medium text-gray-700 mb-1">Current School/University</label><input type="text" id="school" name="school" required placeholder="Ninoy Aquino Senior High School" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></div>
+                    <div><label for="shs_strand" class="block text-sm font-medium text-gray-700 mb-1">Current SHS Strand</label><select id="shs_strand" name="shs_strand" required class="w-full px-4 py-2 border border-gray-300 rounded-lg"><option value="" disabled selected>Select your strand</option><option value="STEM">STEM</option><option value="ABM">ABM</option><option value="HUMSS">HUMSS</option><option value="GAS">GAS</option><option value="TVL">TVL</option></select></div>
+                    <div id="tvl_strand_div" class="hidden"><label for="tvl_strand" class="block text-sm font-medium text-gray-700 mb-1">TVL Strand (If applicable)</label><select id="tvl_strand" name="tvl_strand" class="w-full px-4 py-2 border border-gray-300 rounded-lg"><option value="" disabled selected>Select TVL strand</option><option value="ICT">ICT</option><option value="HE">HE</option><option value="IA">IA</option><option value="AFA">AFA</option></select></div>
+                </div>
+                <div class="mt-10 flex justify-end"><button type="button" onclick="nextStep(2)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-800">Next →</button></div>
+            </div>
+
+            <!-- Step 2: Academic & Creative Interests -->
+            <div id="step-2" class="hidden">
+                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What are you passionate about? 🎨</h1></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step2_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-indigo-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-indigo-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(1)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(3)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+            </div>
+
+            <!-- Step 3: Practical & Technical Interests -->
+            <div id="step-3" class="hidden">
+                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What kind of work do you enjoy? 🛠️</h1></div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step3_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-teal-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-teal-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(2)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(4)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+            </div>
+
+            <!-- Step 4: Interpersonal & Business Interests -->
+            <div id="step-4" class="hidden">
+                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">How do you like to interact with others? 🤝</h1></div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step4_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-purple-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-purple-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                 </div>
+                 <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(3)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(5)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+            </div>
+
+            <!-- Step 5: Personal Abilities -->
+            <div id="step-5" class="hidden">
+                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What are your superpowers? 🦸</h1></div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step5_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-green-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-green-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(4)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="submit" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700">Get Recommendation!</button></div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    const totalSteps = 5;
+    const steps = Array.from({length: totalSteps}, (_, i) => document.getElementById(`step-${i + 1}`));
+    const progressBar = document.getElementById('progress-bar');
+    const stepCounter = document.getElementById('step-counter');
+    const stepLabels = ['About You', 'Academic & Creative', 'Practical & Technical', 'Interpersonal & Business', 'Your Abilities'];
+
+    function showStep(stepNumber) {
+        steps.forEach((step, index) => step.classList.toggle('hidden', (index + 1) !== stepNumber));
+        progressBar.style.width = (stepNumber / totalSteps * 100) + '%';
+        stepCounter.textContent = `Step ${stepNumber} of ${totalSteps}: ${stepLabels[stepNumber - 1]}`;
+        feather.replace();
+    }
+    function nextStep(stepNumber) { showStep(stepNumber); }
+    function prevStep(stepNumber) { showStep(stepNumber); }
+    document.getElementById('shs_strand').addEventListener('change', function() { document.getElementById('tvl_strand_div').classList.toggle('hidden', this.value !== 'TVL'); });
+    feather.replace();
+</script>
+{% endblock %}
+

@@ -1,0 +1,37 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}All Courses | AlignEd AI{% endblock %}
+
+{% block content %}
+<header class="flex justify-between items-center mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">All Available Courses</h1>
+    <p class="text-gray-500">Browse courses in the AlignEd database.</p>
+</header>
+
+<!-- This container will be populated by the Django loop -->
+<div class="space-y-6">
+
+    {% for course in courses %}
+    <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+        
+        <!-- Icon (using the 'icon' field from your database) -->
+        <div class="flex-shrink-0 bg-indigo-100 p-4 rounded-full">
+            <i data-feather="{{ course.icon }}" class="w-8 h-8 text-indigo-600"></i>
+        </div>
+        
+        <!-- Course Name and Description (description is now always visible) -->
+        <div class="flex-1 text-center sm:text-left">
+            <h3 class="font-bold text-xl text-gray-800 mb-1">{{ course.name }}</h3>
+            <p class="text-gray-500">{{ course.description }}</p>
+        </div>
+
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-2xl p-8 text-center">
+        <p class="text-gray-500">No courses are available at this time. Please add them via the admin panel.</p>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}
+

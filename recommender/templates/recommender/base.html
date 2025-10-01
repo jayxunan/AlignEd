@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AlignEd AI{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link { transition: all 0.2s ease-in-out; }
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-900 text-white flex-col p-4 hidden md:flex">
+            <div class="text-2xl font-black mb-10 flex items-center">
+                <i data-feather="cpu" class="mr-2"></i>
+                <span>AlignEd</span>
+            </div>
+            
+            <!-- DYNAMIC NAVIGATION -->
+            {% if user.is_authenticated and user.is_superuser %}
+                <!-- ADMIN NAVIGATION -->
+                <nav class="flex-grow">
+                    <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mb-2">Admin Controls</p>
+                    <ul>
+                        <li><a href="{% url 'admin_dashboard' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'admin_dashboard' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i>Dashboard</a></li>
+                        <li><a href="{% url 'course_list' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'course_list' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="book" class="w-5 h-5 mr-3"></i>Manage Courses</a></li>
+                        <li><a href="{% url 'admin:index' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="database" class="w-5 h-5 mr-3"></i>Raw Database</a></li>
+                    </ul>
+                    <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mt-6 mb-2">Account</p>
+                     <ul>
+                        <li><a href="{% url 'logout' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="log-out" class="w-5 h-5 mr-3"></i>Logout</a></li>
+                    </ul>
+                </nav>
+            {% else %}
+                <!-- GUEST (STUDENT) NAVIGATION -->
+                <nav class="flex-grow">
+                    <ul>
+                        <li><a href="{% url 'dashboard' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'dashboard' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="home" class="w-5 h-5 mr-3"></i>Dashboard</a></li>
+                        <li><a href="{% url 'courses' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'courses' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="book-open" class="w-5 h-5 mr-3"></i>Courses</a></li>
+                        <li><a href="{% url 'assessment' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'assessment' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="edit-3" class="w-5 h-5 mr-3"></i>Take Assessment</a></li>
+                    </ul>
+                </nav>
+                <!-- NEW DISCREET LOGIN LINK -->
+                <div class="mt-auto pt-4 border-t border-indigo-700">
+                    <a href="{% url 'login' %}" class="flex items-center justify-center p-2 text-indigo-300 hover:text-white text-sm font-medium transition-colors rounded-md hover:bg-indigo-800">
+                        <i data-feather="shield" class="w-4 h-4 mr-2"></i>
+                        Admin Panel
+                    </a>
+                </div>
+            {% endif %}
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-8">
+            {% block content %}
+            <!-- Page-specific content will go here -->
+            {% endblock %}
+        </main>
+    </div>
+
+    <script>
+        feather.replace();
+    </script>
+
+</body>
+</html>
+

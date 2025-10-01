@@ -1,0 +1,42 @@
+{% extends 'recommender/base.html' %}
+{% block title %}Manage Courses{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">Manage Courses</h1>
+        <p class="text-gray-600">Add, edit, or delete courses available in the system.</p>
+    </div>
+    <a href="{% url 'course_create' %}" class="bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-800 transition-colors">
+        <i data-feather="plus" class="inline-block w-4 h-4 mr-2"></i>Add New Course
+    </a>
+</div>
+
+<div class="bg-white p-6 rounded-2xl shadow">
+    <table class="w-full">
+        <thead>
+            <tr class="border-b">
+                <th class="text-left p-3">Course Name</th>
+                <th class="text-left p-3">Description</th>
+                <th class="text-left p-3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="p-3 font-medium">{{ course.name }}</td>
+                <td class="p-3 text-gray-600">{{ course.description|truncatewords:15 }}</td>
+                <td class="p-3">
+                    <a href="{% url 'course_update' course.pk %}" class="text-blue-600 hover:underline mr-4">Edit</a>
+                    <a href="{% url 'course_delete' course.pk %}" class="text-red-600 hover:underline">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center p-6 text-gray-500">No courses have been added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

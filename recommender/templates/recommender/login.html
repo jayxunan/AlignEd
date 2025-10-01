@@ -1,0 +1,113 @@
+{% extends 'recommender/base.html' %}
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+        
+        <!-- DYNAMICALLY SHOW EITHER LOGIN OR 2FA FORM -->
+        {% if awaiting_2fa %}
+
+        <!-- 2FA VERIFICATION FORM -->
+        <div class="text-center">
+            <div class="inline-block bg-green-100 p-4 rounded-full mb-4">
+                <i data-feather="mail" class="w-8 h-8 text-green-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">Check Your Email</h1>
+            <p class="text-gray-500 mt-2">We've sent a 5-digit verification code to the admin email address.</p>
+        </div>
+        
+        <form class="space-y-6" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="2fa_code" class="block text-sm font-medium text-gray-700">Verification Code</label>
+                <input id="2fa_code" name="2fa_code" type="text" inputmode="numeric" pattern="\d{5}" maxlength="5" required class="mt-1 block w-full text-center text-2xl tracking-[1em] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <!-- Countdown Timer -->
+            <div id="timer" class="text-center text-sm font-medium text-gray-500">
+                Code expires in: <span id="countdown">3:00</span>
+            </div>
+
+            <!-- Display Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="p-4 text-sm {% if message.tags == 'error' %}text-red-700 bg-red-100{% else %}text-green-700 bg-green-100{% endif %} rounded-lg" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Verify Code
+                </button>
+            </div>
+        </form>
+        <div class="text-center text-xs text-gray-400">
+            <a href="{% url 'login' %}" class="hover:underline">Didn't get a code? Log in again.</a>
+        </div>
+        
+        <script>
+            const countdownEl = document.getElementById('countdown');
+            const timerContainer = document.getElementById('timer');
+            let timeLeft = 180; // 3 minutes in seconds
+
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    countdownEl.textContent = "Expired";
+                    timerContainer.classList.add('text-red-600');
+                    return;
+                }
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                countdownEl.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        </script>
+
+        {% else %}
+
+        <!-- STANDARD LOGIN FORM -->
+        <div class="text-center">
+            <div class="inline-block bg-indigo-100 p-4 rounded-full mb-4">
+                <i data-feather="lock" class="w-8 h-8 text-indigo-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">Admin Panel Login</h1>
+            <p class="text-gray-500 mt-2">Please enter your credentials to proceed.</p>
+        </div>
+        
+        <form class="space-y-6" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input id="username" name="username" type="text" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input id="password" name="password" type="password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <!-- Display error messages here -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Sign In
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
