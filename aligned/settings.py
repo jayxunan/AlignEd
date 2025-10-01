@@ -14,21 +14,27 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-local-dev-key-for-ali
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 # --- Host and Origin Configuration ---
-# On Render, this reads the value from your environment variables.
-# For local development, it adds '127.0.0.1' and 'localhost'.
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+# THIS IS THE FINAL FIX: This new logic cleans up the input from Render.
+ALLOWED_HOSTS_str = os.environ.get("ALLOWED_HOSTS")
+ALLOWED_HOSTS = []
+if ALLOWED_HOSTS_str:
+    # This strips whitespace from each host (e.g., " host.com " -> "host.com")
+    ALLOWED_HOSTS.extend([host.strip() for host in ALLOWED_HOSTS_str.split(",")])
+
 if DEBUG:
     ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost'])
 
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+CSRF_TRUSTED_ORIGINS_str = os.environ.get("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = []
+if CSRF_TRUSTED_ORIGINS_str:
+    # This also strips whitespace from each origin
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in CSRF_TRUSTED_ORIGINS_str.split(",")])
+
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.append("http://127.0.0.1:8000")
-
-# --- THIS IS THE FIX ---
-# Corrected 'httpss' to 'https'
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # --- END OF FIX ---
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # --- Application definition ---
 INSTALLED_APPS = [
@@ -57,7 +63,8 @@ ROOT_URLCONF = 'aligned.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], 'APP_DIRS': True,
+        'DIRS': [],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
