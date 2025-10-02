@@ -10,20 +10,10 @@ from django.conf import settings
 from django.core.cache import cache
 import random
 from datetime import datetime, timedelta
-from django.db.models import Count, Avg
+from django.db.models import Count
 from django.http import HttpResponse, JsonResponse, FileResponse
-import io
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-from reportlab.lib.utils import ImageReader
-import matplotlib.pyplot as plt
-import csv
-import pandas as pd
-import joblib
 import os
 from .models import Assessment, Course
-from . import train_model
 import json
 
 #course persona
@@ -123,6 +113,8 @@ def assessment_view(request):
     return render(request, 'recommender/assessment.html', context)
 
 def recommendation_view(request):
+    import pandas as pd
+    import joblib
     if request.method == 'POST':
         try:
             model_path = os.path.join(os.path.dirname(__file__), 'random_forest_model.joblib')
@@ -324,6 +316,15 @@ def course_delete_view(request, pk):
 
 @user_passes_test(is_superuser)
 def export_analytics_pdf_view(request):
+    import io
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import inch
+    from reportlab.lib.utils import ImageReader
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
