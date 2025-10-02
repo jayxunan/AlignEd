@@ -3,7 +3,6 @@ import numpy as np
 import random
 import os
 
-# (The PROFILES and COURSES lists are updated to include new interests)
 PROFILES = {
     "STEM_Tech": {
         "interests": {"science": (5, 5), "tech": (5, 5), "building": (4, 5), "arts": (1, 2), "helping": (1, 2)},
@@ -90,5 +89,4 @@ if __name__ == '__main__':
     combined_df = combined_df[simulated_df.columns] # Ensure consistent column order
     combined_df.to_csv(cleaned_real_data_path, index=False)
     
-    print(f"\n✅ Successfully updated '{cleaned_real_data_path}' with {len(combined_df)} total rows.")
-    print("➡️ Next Step: Run 'python recommender/train_model.py' to give your AI a new brain!")
+    print(f"\nSuccessfully updated '{cleaned_real_data_path}' with {len(combined_df)} total rows.")

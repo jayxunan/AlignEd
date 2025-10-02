@@ -1,14 +1,7 @@
 import pandas as pd
-
-# This dictionary now uses the EXACT column names you provided.
 column_mapping = {
-    # This is the final choice column (our primary target)
     'Which college course are you planning to choose?': 'course',
-    
-    # This is the new fallback column
     'Select up to (3) courses you\'d consider choosing': 'considered_courses',
-    
-    # The rest of the feature columns
     'Current SHS Strand': 'shs_strand',
     'What is your current TVL Strand': 'tvl_strand',
     'Rate your interest in these areas (1-5)\n(1)least to (5)most interested [Science/Experiments]': 'interest_science',
@@ -32,16 +25,14 @@ try:
     if 'course' not in df.columns or 'considered_courses' not in df.columns:
         raise KeyError("One of the course-related columns was not found after renaming. Please check your CSV file headers.")
 
-    # --- NEW LOGIC TO RESCUE ROWS ---
-    # If the final 'course' answer is blank, fill it with the 'considered_courses' answer.
+    # pang fill
     df['course'].fillna(df['considered_courses'], inplace=True)
 
-    # --- Select only the columns needed for the final dataset ---
-    # We don't need 'considered_courses' in the final training file.
+    # 1
     required_columns = [col for col in column_mapping.values() if col != 'considered_courses']
     df_clean = df[required_columns]
 
-    # --- Data Cleaning Steps ---
+    # clean
     df_clean['course'] = df_clean['course'].apply(lambda x: str(x).split(';')[0].split(',')[0].strip())
     df_clean['tvl_strand'].fillna('none', inplace=True)
     df_clean.dropna(subset=['course'], inplace=True)

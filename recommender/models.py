@@ -13,8 +13,7 @@ class Assessment(models.Model):
     school = models.CharField(max_length=200, verbose_name="School/University")
     shs_strand = models.CharField(max_length=50, verbose_name="SHS Strand")
     tvl_strand = models.CharField(max_length=50, blank=True, null=True, verbose_name="TVL Strand")
-    
-    # (All of your existing interest and ability fields remain here)
+
     interest_science = models.IntegerField(default=0)
     interest_arts = models.IntegerField(default=0)
     interest_teaching = models.IntegerField(default=0)
@@ -32,12 +31,12 @@ class Assessment(models.Model):
     ability_practical = models.IntegerField(default=0)
     ability_teamwork = models.IntegerField(default=0)
 
-    # AI Output
+
     recommended_course_1 = models.CharField(max_length=200, blank=True)
     recommended_course_2 = models.CharField(max_length=200, blank=True)
     recommended_course_3 = models.CharField(max_length=200, blank=True)
     
-    # --- NEW: Fields to store student feedback ---
+
     feedback_rating_1 = models.IntegerField(null=True, blank=True, help_text="Rating for the 1st recommendation")
     feedback_rating_2 = models.IntegerField(null=True, blank=True, help_text="Rating for the 2nd recommendation")
     feedback_rating_3 = models.IntegerField(null=True, blank=True, help_text="Rating for the 3rd recommendation")

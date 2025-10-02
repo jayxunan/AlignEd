@@ -4,11 +4,7 @@
 {% block content %}
 <div class="flex items-center justify-center min-h-[calc(100vh-10rem)]">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
-        
-        <!-- DYNAMICALLY SHOW EITHER LOGIN OR 2FA FORM -->
         {% if awaiting_2fa %}
-
-        <!-- 2FA VERIFICATION FORM -->
         <div class="text-center">
             <div class="inline-block bg-green-100 p-4 rounded-full mb-4">
                 <i data-feather="mail" class="w-8 h-8 text-green-600"></i>
@@ -24,12 +20,10 @@
                 <input id="2fa_code" name="2fa_code" type="text" inputmode="numeric" pattern="\d{5}" maxlength="5" required class="mt-1 block w-full text-center text-2xl tracking-[1em] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
             </div>
             
-            <!-- Countdown Timer -->
+            <!-- tatlong menotu -->
             <div id="timer" class="text-center text-sm font-medium text-gray-500">
                 Code expires in: <span id="countdown">3:00</span>
             </div>
-
-            <!-- Display Messages -->
             {% if messages %}
                 {% for message in messages %}
                 <div class="p-4 text-sm {% if message.tags == 'error' %}text-red-700 bg-red-100{% else %}text-green-700 bg-green-100{% endif %} rounded-lg" role="alert">
@@ -50,14 +44,13 @@
         
         <script>
             const countdownEl = document.getElementById('countdown');
-            const timerContainer = document.getElementById('timer');
-            let timeLeft = 180; // 3 minutes in seconds
+            let timeLeft = 180; // 3 minutes nka seconds
 
             const timerInterval = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     countdownEl.textContent = "Expired";
-                    timerContainer.classList.add('text-red-600');
+                    document.getElementById('timer').classList.add('text-red-600');
                     return;
                 }
                 timeLeft--;
@@ -70,7 +63,6 @@
 
         {% else %}
 
-        <!-- STANDARD LOGIN FORM -->
         <div class="text-center">
             <div class="inline-block bg-indigo-100 p-4 rounded-full mb-4">
                 <i data-feather="lock" class="w-8 h-8 text-indigo-600"></i>
@@ -88,10 +80,23 @@
             
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input id="password" name="password" type="password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <div class="mt-1 relative">
+                    <input id="password" name="password" type="password" required class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                        <i id="eye-icon" data-feather="eye"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Display error messages here -->
+            <div class="flex items-center justify-end">
+                <div class="text-sm">
+                    <a href="{% url 'password_reset' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Forgot your password?
+                    </a>
+                </div>
+            </div>
+
+            <!-- erawr -->
             {% if messages %}
                 {% for message in messages %}
                 <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
@@ -109,5 +114,21 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    const togglePassword = document.querySelector('#toggle-password');
+    if (togglePassword) {
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eye-icon');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            eyeIcon.setAttribute('data-feather', type === 'password' ? 'eye' : 'eye-off');
+            feather.replace();
+        });
+    }
+</script>
 {% endblock %}
 
