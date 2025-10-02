@@ -12,15 +12,22 @@ ALLOWED_HOSTS_str = os.environ.get("ALLOWED_HOSTS")
 ALLOWED_HOSTS = []
 if ALLOWED_HOSTS_str:
     ALLOWED_HOSTS.extend([host.strip() for host in ALLOWED_HOSTS_str.split(",")])
+
 if DEBUG:
     ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost'])
+else:
+    # fallback if not set in environment
+    ALLOWED_HOSTS.append("aligned.onrender.com")
 
 CSRF_TRUSTED_ORIGINS_str = os.environ.get("CSRF_TRUSTED_ORIGINS")
 CSRF_TRUSTED_ORIGINS = []
 if CSRF_TRUSTED_ORIGINS_str:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in CSRF_TRUSTED_ORIGINS_str.split(",")])
+
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.append("http://127.0.0.1:8000")
+else:
+    CSRF_TRUSTED_ORIGINS.append("https://aligned.onrender.com")
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -71,6 +78,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -98,7 +106,5 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
 
-
 LOGIN_URL = 'login'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
-
