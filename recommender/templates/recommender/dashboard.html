@@ -3,58 +3,109 @@
 {% block title %}Dashboard | AlignEd AI{% endblock %}
 
 {% block content %}
-<!-- Header now has the admin icon removed for a cleaner student view -->
-<header class="flex justify-between items-center mb-8">
-    <h1 class="text-2xl font-bold text-gray-800">Course Recommendation Dashboard</h1>
+<style>
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+        50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+    }
+    .pulse-animate {
+        animation: pulse 2s infinite;
+    }
+    .card-hover {
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+<!-- taas -->
+<header class="mb-8 hidden md:block">
+    <h1 class="text-3xl font-bold text-gray-800">Welcome to Aligned!</h1>
+    <p class="text-gray-500 mt-1">Let's explore your future course choice.</p>
 </header>
 
-<section class="bg-indigo-700 text-white rounded-2xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-    <div class="mb-4 md:mb-0">
-        <h2 class="text-3xl font-bold mb-2">Welcome to AlignEd!</h2>
-        <p class="text-indigo-200">Discover courses that match your skills and interests for your future career.</p>
+<!-- kahon -->
+<section class="bg-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col md:flex-row items-center justify-between overflow-hidden">
+    <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
+        <h2 class="text-4xl font-black text-gray-900 leading-tight mb-4">Find Your <span class="text-indigo-600">Future Course</span>.</h2>
+        <p class="text-gray-600 mb-6">Our AI powered assessment will help you discover the college courses that is optimal for your skills and interests. It's quick, fun, and helpful!</p>
+        <a href="{% url 'assessment' %}" class="pulse-animate inline-block bg-indigo-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-indigo-700 transition-colors">
+            Start Your Assessment
+        </a>
     </div>
-    <a href="{% url 'assessment' %}" class="bg-white text-indigo-700 font-bold py-3 px-6 rounded-lg whitespace-nowrap hover:bg-gray-200 transition-colors transform hover:scale-105">Take Assessment</a>
-</section>
-
-<!-- DYNAMIC STATS SECTION -->
-<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl flex items-center space-x-4">
-        <div class="bg-blue-100 p-3 rounded-full"><i data-feather="book-open" class="text-blue-500"></i></div>
-        <div>
-            <p class="text-gray-500">Available Courses</p>
-            <p class="text-2xl font-bold text-gray-800">{{ available_courses_count|default:"0" }}</p>
-        </div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl flex items-center space-x-4">
-        <div class="bg-green-100 p-3 rounded-full"><i data-feather="users" class="text-green-500"></i></div>
-        <div>
-            <p class="text-gray-500">Total Assessments Taken</p>
-            <p class="text-2xl font-bold text-gray-800">{{ total_assessments_count|default:"0" }}</p>
-        </div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl flex items-center space-x-4">
-        <div class="bg-purple-100 p-3 rounded-full"><i data-feather="check-circle" class="text-purple-500"></i></div>
-        <div>
-            <p class="text-gray-500">Model Accuracy</p>
-            <p class="text-2xl font-bold text-gray-800">87.5%</p> <!-- Placeholder, can be made dynamic -->
-        </div>
+    <div class="md:w-1/2 flex justify-center items-center">
+        <svg width="300" height="300" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 190C149.706 190 190 149.706 190 100C190 50.2944 149.706 10 100 10C50.2944 10 10 50.2944 10 100C10 149.706 50.2944 190 100 190Z" fill="url(#paint0_linear_1_2)"/>
+            <path d="M100 125C113.807 125 125 113.807 125 100C125 86.1929 113.807 75 100 75C86.1929 75 75 86.1929 75 100C75 113.807 86.1929 125 100 125Z" fill="white"/>
+            <path d="M100 125C113.807 125 125 113.807 125 100" stroke="#4F46E5" stroke-width="6" stroke-linecap="round"/>
+            <path d="M155.778 127.889L136.222 118.111" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+            <path d="M45.2217 73.8892L64.7773 83.6669" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+            <path d="M127.889 45.2217L118.111 64.7773" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+            <path d="M73.8892 155.778L83.6669 136.222" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/>
+            <defs>
+            <linearGradient id="paint0_linear_1_2" x1="10" y1="10" x2="190" y2="190" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#818CF8"/>
+            <stop offset="1" stop-color="#4F46E5"/>
+            </linearGradient>
+            </defs>
+        </svg>
     </div>
 </section>
 
-<!-- DYNAMIC TRENDING COURSES SECTION -->
+<!-- statsa -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="card-hover bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg">
+        <div class="flex items-center space-x-4">
+            <div class="bg-white/20 p-3 rounded-full"><i data-feather="book-open" class="text-white"></i></div>
+            <div>
+                <p class="text-blue-200">Available Courses</p>
+                <p class="text-3xl font-bold">{{ available_courses_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-hover bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-lg">
+        <div class="flex items-center space-x-4">
+            <div class="bg-white/20 p-3 rounded-full"><i data-feather="users" class="text-white"></i></div>
+            <div>
+                <p class="text-green-200">Assessments Taken</p>
+                <p class="text-3xl font-bold">{{ total_assessments_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-hover bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg">
+        <div class="flex items-center space-x-4">
+            <div class="bg-white/20 p-3 rounded-full"><i data-feather="thumbs-up" class="text-white"></i></div>
+            <div>
+                <p class="text-purple-200">Feedback Agreement</p>
+                <p class="text-3xl font-bold">{{ feedback_agreement_score|floatformat:1 }}%</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- top -->
 <section>
     <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Trending Courses</h2>
-        <p class="text-gray-500">Most frequently recommended by our system</p>
+        <h2 class="text-xl font-bold text-gray-800">Top Recommended Courses</h2>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         {% for course in top_recommended_courses %}
-        <div class="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 class="font-bold text-lg text-gray-800">{{ course.recommended_course_1 }}</h3>
-            <p class="text-sm text-gray-500">{{ course.count }} Recommendations</p>
+        <div class="card-hover bg-white rounded-2xl p-6 shadow-md">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-xs font-bold uppercase text-indigo-500">#{{ forloop.counter }} Most Recommended</span>
+                    <h3 class="font-bold text-lg text-gray-800 mt-1">{{ course.name }}</h3>
+                </div>
+                <div class="bg-indigo-100 p-2 rounded-full">
+                    <i data-feather="{{ course.icon }}" class="text-indigo-600 w-5 h-5"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-3">{{ course.count }} total recommendations</p>
         </div>
         {% empty %}
-        <p class="text-gray-500 col-span-3">No assessments have been taken yet.</p>
+        <p class="text-gray-500 col-span-3 bg-white p-6 rounded-2xl text-center">No assessments have been taken yet.</p>
         {% endfor %}
     </div>
 </section>

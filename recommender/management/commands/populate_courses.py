@@ -7,8 +7,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Deleting existing courses to ensure a clean update...")
         Course.objects.all().delete()
-
-        # The expanded and balanced list now contains 36 courses.
         courses_to_add = [
             # --- Technology & Computing ---
             {'name': 'Computer Science', 'description': 'Focuses on algorithms, data structures, and the theory of computation to build complex software.', 'icon': 'cpu'},

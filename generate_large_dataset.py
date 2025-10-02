@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import random
-
-# --- COMPLETE LIST OF 35 COURSES ---
 COURSES = [
     'Computer Science', 'Information Technology', 'Data Science', 'Game Development', 'Web & Mobile App Development', 'ICT (Tech-Voc)',
     'Computer Engineering', 'Civil Engineering', 'Electronics Engineering', 'Mechanical Engineering', 'Architecture',
@@ -13,7 +11,6 @@ COURSES = [
     'Automotive Technology', 'Electrical Installation', 'Mechatronics Technology', 'Agriculture', 'Marine Biology'
 ]
 
-# --- DETAILED PERSONAS FOR DATA GENERATION ---
 PROFILES = {
     'Tech': {'interests': {'tech': (5,5), 'building': (4,5), 'science': (3,4)}, 'abilities': {'logic': (5,5), 'practical': (4,5)}, 'courses': ['Computer Science', 'Information Technology', 'Data Science', 'Web & Mobile App Development', 'ICT (Tech-Voc)']},
     'Engineering': {'interests': {'building': (5,5), 'science': (4,5), 'tech': (3,4)}, 'abilities': {'logic': (5,5), 'practical': (5,5)}, 'courses': ['Computer Engineering', 'Civil Engineering', 'Electronics Engineering', 'Mechanical Engineering']},
@@ -26,14 +23,12 @@ PROFILES = {
     'Services': {'interests': {'helping': (5,5), 'leading': (4,5), 'business': (3,4)}, 'abilities': {'teamwork': (5,5), 'comm': (5,5)}, 'courses': ['Hospitality Management', 'Tourism Management']},
     'Vocational': {'interests': {'building': (5,5), 'tech': (4,5), 'sports': (2,3)}, 'abilities': {'practical': (5,5), 'logic': (3,4)}, 'courses': ['Automotive Technology', 'Electrical Installation', 'Mechatronics Technology']},
 }
-
-# Reverse map to find a persona for any given course
 COURSE_TO_PROFILE = {course: profile_name for profile_name, details in PROFILES.items() for course in details['courses']}
 
 def generate_row_for_course(course):
     profile_name = COURSE_TO_PROFILE.get(course)
     if not profile_name:
-        return None # Should not happen if all courses are mapped
+        return None
     
     profile = PROFILES[profile_name]
 
@@ -79,8 +74,7 @@ if __name__ == "__main__":
     df.to_csv(output_path, index=False)
     
     print("\n----------------------------------------------------")
-    print(f"✅ Successfully generated a new, balanced dataset!")
-    print(f"✅ Saved {len(df)} rows to '{output_path}'.")
+    print(f"Successfully generated a maraming dataset!")
+    print(f"Saved {len(df)} rows to '{output_path}'.")
     print("----------------------------------------------------\n")
-    print("➡️ Your system is now ready to be trained with high-quality, unbiased data.")
-    print("➡️ Next Step: Run 'python recommender/train_model.py' to give your AI its new brain.")
+    print("Your system is now ready to be trained.")

@@ -3,17 +3,13 @@
 {% block title %}Your Recommendations | AlignEd AI{% endblock %}
 
 {% block content %}
-<!-- Add Chart.js library for visualizations -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    /* Styling for the star rating feedback system */
     .star-rating input[type="radio"] { display: none; }
     .star-rating label { font-size: 2rem; color: #d1d5db; cursor: pointer; transition: color 0.2s; }
-    /* This handles the hover and checked states to color the stars */
     .star-rating:not(.is-disabled):not(:hover) input:checked ~ label,
     .star-rating:not(.is-disabled):hover input ~ label:hover,
     .star-rating:not(.is-disabled):hover input ~ label:hover ~ label { color: #f59e0b; }
-    /* This class is added by JavaScript after a rating is submitted */
     .star-rating.is-disabled label { cursor: default; color: #f59e0b !important; opacity: 0.6; }
 </style>
 
@@ -25,10 +21,8 @@
     <p class="text-lg text-gray-500 mt-3">We've analyzed your unique profile to find the courses that best match your talents and passions.</p>
 </div>
 
-<!-- Recommendations are NOT in a form anymore -->
 <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
     {% for rec in recommendations %}
-    <!-- Main Recommendation Card -->
     <div class="bg-white rounded-2xl shadow-lg flex flex-col h-full
         {% if forloop.counter == 1 %} border-4 border-indigo-600 {% else %} border-4 border-transparent {% endif %}">
         
@@ -52,13 +46,13 @@
             <div class="text-5xl font-black text-indigo-600 my-2">{{ rec.match_score }}</div>
         </div>
 
-        <!-- Visualization Section -->
+        <!-- biswal -->
         <div class="px-4 py-6 bg-gray-50">
             <h3 class="text-center font-bold text-gray-700 mb-2">Your Profile vs. Ideal Profile</h3>
             <canvas id="chart-{{ forloop.counter }}" data-chart='{{ rec.insights.chart_data }}'></canvas>
         </div>
 
-        <!-- In-Depth Insights Section -->
+        <!-- insights -->
         <div class="p-6 flex-grow">
             <h3 class="font-bold text-lg text-gray-800 mb-3">Why it's a good fit:</h3>
             <ul class="space-y-2 mb-6">
@@ -82,8 +76,6 @@
             </ul>
             {% endif %}
         </div>
-
-        <!-- Auto-Submitting Feedback Section -->
         <div class="p-6 border-t bg-gray-50 rounded-b-2xl">
             <h4 class="font-bold text-center text-gray-600 mb-2">How accurate is this recommendation?</h4>
             <div class="star-rating flex justify-center flex-row-reverse" data-rec-number="{{ forloop.counter }}">
@@ -101,7 +93,6 @@
     {% endfor %}
 </div>
 
-<!-- Button Section (outside the feedback form) -->
 <div class="text-center mt-12 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
     <a href="{% url 'dashboard' %}" class="w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
         <i data-feather="home" class="inline-block w-4 h-4 mr-2"></i>Back to Home
@@ -113,7 +104,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // (Your existing chart script)
         document.querySelectorAll('canvas').forEach(canvas => {
             const chartDataString = canvas.dataset.chart;
             if (chartDataString && chartDataString !== 'None' && chartDataString !== 'null') {
@@ -131,7 +121,7 @@
             }
         });
 
-        // --- NEW: AUTO-SUBMIT FEEDBACK SCRIPT ---
+        // --- auto submit feedback ---
         const assessmentId = '{{ assessment_id }}';
         const csrfToken = '{{ csrf_token }}';
         

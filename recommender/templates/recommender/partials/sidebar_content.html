@@ -1,0 +1,38 @@
+<div class="text-2xl font-black mb-10 flex items-center">
+    <i data-feather="cpu" class="mr-2"></i>
+    <span>AlignEd</span>
+</div>
+
+{% if user.is_authenticated and user.is_superuser %}
+    <!-- admin yah -->
+    <nav class="flex-grow">
+        <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mb-2">Admin Controls</p>
+        <ul>
+            <li><a href="{% url 'admin_dashboard' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'admin_dashboard' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="bar-chart-2" class="w-5 h-5 mr-3"></i>Dashboard</a></li>
+            <li><a href="{% url 'course_list' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'course_list' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="book" class="w-5 h-5 mr-3"></i>Manage Courses</a></li>
+            <li><a href="{% url 'admin:index' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="database" class="w-5 h-5 mr-3"></i>Raw Database</a></li>
+        </ul>
+        <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mt-6 mb-2">Account</p>
+         <ul>
+            <li><a href="{% url 'logout' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="log-out" class="w-5 h-5 mr-3"></i>Logout</a></li>
+        </ul>
+    </nav>
+{% else %}
+    <!-- pang student -->
+    <nav class="flex-grow">
+        <ul>
+            <li><a href="{% url 'dashboard' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'dashboard' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="home" class="w-5 h-5 mr-3"></i>Home</a></li>
+            <li><a href="{% url 'assessment' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'assessment' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="edit-3" class="w-5 h-5 mr-3"></i>Take Assessment</a></li>
+            <li><a href="{% url 'courses' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'courses' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="book-open" class="w-5 h-5 mr-3"></i>Courses</a></li>
+            <li><a href="{% url 'about' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'about' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="info" class="w-5 h-5 mr-3"></i>About</a></li>
+        </ul>
+    </nav>
+    <!-- admin login link shhhh -->
+    <div class="mt-auto pt-4 border-t border-indigo-700">
+        <a href="{% url 'login' %}" class="flex items-center justify-center p-2 text-indigo-300 hover:text-white text-sm font-medium transition-colors rounded-md hover:bg-indigo-800">
+            <i data-feather="shield" class="w-4 h-4 mr-2"></i>
+            Admin Panel
+        </a>
+    </div>
+{% endif %}
+

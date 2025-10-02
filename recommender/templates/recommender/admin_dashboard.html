@@ -3,144 +3,107 @@
 {% block title %}Admin Dashboard | AlignEd AI{% endblock %}
 
 {% block content %}
-<header class="flex justify-between items-center mb-8">
+<header class="flex flex-col md:flex-row justify-between md:items-center mb-8">
     <div>
         <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
         <p class="text-gray-600">System overview, data management, and model controls.</p>
     </div>
-    <a href="{% url 'admin:index' %}" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors">
-        <i data-feather="database" class="inline-block w-4 h-4 mr-2"></i>Django Admin
-    </a>
+    <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+        <a href="{% url 'export_analytics' %}" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center">
+            <i data-feather="download" class="inline-block w-4 h-4 mr-2"></i>Export CSV
+        </a>
+        <a href="{% url 'export_analytics_pdf' %}" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors inline-flex items-center">
+            <i data-feather="file-text" class="inline-block w-4 h-4 mr-2"></i>Export PDF Report
+        </a>
+         <a href="{% url 'admin:index' %}" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors inline-flex items-center">
+            <i data-feather="database" class="inline-block w-4 h-4 mr-2"></i>Django Admin
+        </a>
+    </div>
 </header>
 
-<!-- Analytics Section -->
+<!-- analeteks -->
 <section class="mb-10">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold text-gray-700">System Analytics</h2>
-        <a href="{% url 'export_analytics' %}" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
-            <i data-feather="download" class="inline-block w-4 h-4 mr-2"></i>Export Assessments
-        </a>
+    <h2 class="text-2xl font-semibold text-gray-700 mb-4">System Analytics</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-md"><p class="text-gray-500">Total Assessments</p><p class="text-3xl font-bold text-gray-800">{{ total_assessments_count|default:"0" }}</p></div>
+        <div class="bg-white p-6 rounded-2xl shadow-md"><p class="text-gray-500">Feedback Submitted</p><p class="text-3xl font-bold text-gray-800">{{ feedback_count|default:"0" }}</p></div>
+        <div class="bg-white p-6 rounded-2xl shadow-md"><p class="text-gray-500">Top Match Agreement</p><p class="text-3xl font-bold text-gray-800">{{ agreement_score|floatformat:1 }}%</p></div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-2xl shadow">
-             <div class="flex items-center space-x-4">
-                <div class="bg-blue-100 p-3 rounded-full"><i data-feather="users" class="text-blue-500"></i></div>
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+            <h3 class="font-bold mb-4 text-gray-700">Assessments by Strand</h3>
+            <div class="space-y-3">
+                {% for item in assessments_by_strand %}
                 <div>
-                    <p class="text-gray-500">Total Assessments</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ total_assessments_count|default:"0" }}</p>
+                    <div class="flex justify-between mb-1"><span class="text-sm font-medium">{{ item.shs_strand }}</span><span class="text-sm font-medium">{{ item.count }}</span></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-indigo-600 h-2.5 rounded-full" style="width: {% widthratio item.count total_assessments_count 100 %}%"></div></div>
                 </div>
-            </div>
-        </div>
-         <div class="bg-white p-6 rounded-2xl shadow col-span-1 md:col-span-2 lg:col-span-3">
-             <h3 class="font-bold text-gray-700 mb-2">Assessments by Strand</h3>
-            <div class="flex space-x-6">
-            {% for item in assessments_by_strand %}
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-indigo-600">{{item.count}}</p>
-                    <p class="text-sm text-gray-500">{{item.shs_strand}}</p>
-                </div>
-            {% empty %}
+                {% empty %}
                 <p class="text-gray-500">No data available.</p>
-            {% endfor %}
+                {% endfor %}
             </div>
         </div>
+        <div class="bg-white p-6 rounded-2xl shadow-md">
+            <h3 class="font-bold mb-4 text-gray-700">Top Recommended Courses</h3>
+            <ul class="space-y-2">
+                {% for course in top_recommended_courses %}
+                <li class="flex justify-between items-center"><span class="text-gray-800">{{ course.recommended_course_1 }}</span><span class="font-bold bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">{{ course.count }} times</span></li>
+                {% empty %}
+                <li class="text-gray-500">No data available.</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 </section>
 
-<!-- Course Management Section -->
 <section class="mb-10">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold text-gray-700">Course Management</h2>
-        <a href="{% url 'course_list' %}" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-            <i data-feather="edit" class="inline-block w-4 h-4 mr-2"></i>Manage All Courses
-        </a>
-    </div>
-    <div class="bg-white p-8 rounded-2xl shadow">
-        <p class="text-gray-600">Add, edit, or delete the courses that the system can recommend to students. This allows you to update the system's knowledge base in real-time.</p>
+    <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Feedback Loop</h2>
+    <div class="bg-white p-8 rounded-2xl shadow-md">
+        <p class="text-gray-600 mb-4">Generate a new training dataset based on high-rated student feedback. Download the file, then re-upload it below to retrain the model.</p>
+        <a href="{% url 'generate_feedback_data' %}" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Generate & Download Feedback CSV</a>
     </div>
 </section>
 
-<!-- AI Model Management -->
-<section class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- AI Feedback Loop -->
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">AI Feedback Loop</h2>
-        <div class="bg-white p-8 rounded-2xl shadow h-full">
-            <p class="text-gray-600 mb-4">Generate a new training dataset based on high-rated student feedback. This allows the AI to learn from user preferences over time.</p>
-            <a href="{% url 'generate_feedback_data' %}" class="bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-cyan-700 transition-colors">
-                Generate & Download Feedback CSV
-            </a>
-        </div>
-    </div>
-    <!-- Model Retraining -->
-    <div>
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Retrain AI Model</h2>
-        <div class="bg-white p-8 rounded-2xl shadow h-full">
-            <p class="text-gray-600 mb-4">Upload a `courses_dataset.csv` file (either from feedback or simulated data) to retrain the model.</p>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="new_dataset" accept=".csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                <button type="submit" class="mt-4 bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-800">Upload and Retrain</button>
-                 {% if upload_message %}
-                <div class="mt-4 p-3 rounded-lg bg-green-100 text-green-800 text-sm">
-                    {{ upload_message }}
-                </div>
-                {% endif %}
-            </form>
-        </div>
+<section class="mb-10">
+    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Retrain AI Model</h2>
+    <div class="bg-white p-8 rounded-2xl shadow-md">
+        <p class="text-gray-600 mb-4">Upload a `courses_dataset.csv` or a feedback-generated CSV to retrain the model.</p>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="new_dataset" accept=".csv" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            <button type="submit" class="mt-4 bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-800">Upload and Retrain</button>
+        </form>
+        {% if upload_message %}<div class="mt-4 p-4 rounded-lg bg-green-100 text-green-800">{{ upload_message }}</div>{% endif %}
     </div>
 </section>
 
-<!-- Danger Zone -->
+<!-- wag -->
 <section>
     <h2 class="text-2xl font-semibold text-red-600 mb-4">Danger Zone</h2>
     <div class="bg-red-50 border border-red-200 p-8 rounded-2xl">
         <div class="flex justify-between items-center">
-            <div>
-                <h3 class="font-bold text-red-800">Delete All Assessment Data</h3>
-                <p class="text-red-700">This action is irreversible. All saved assessment records will be permanently deleted.</p>
-            </div>
-            <button onclick="openDeleteModal()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">Delete All Data</button>
+            <div><h3 class="font-bold text-red-800">Delete All Assessment Data</h3><p class="text-red-700">This action is irreversible. All saved assessment records will be permanently deleted.</p></div>
+            <button onclick="openDeleteModal()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Delete All Data</button>
         </div>
     </div>
 </section>
 
-<!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+<div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <i data-feather="alert-triangle" class="h-6 w-6 text-red-600"></i>
-            </div>
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Are you absolutely sure?</h3>
-            <div class="mt-2 px-7 py-3">
-                <p class="text-sm text-gray-500">
-                    This will permanently delete all assessment records from the database. This action cannot be undone.
-                </p>
-            </div>
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><i data-feather="alert-triangle" class="h-6 w-6 text-red-600"></i></div>
+            <h3 class="text-lg font-medium text-gray-900">Are you sure?</h3>
+            <div class="mt-2 px-7 py-3"><p class="text-sm text-gray-500">This will permanently delete all assessment records. This action cannot be undone.</p></div>
             <div class="items-center px-4 py-3">
-                <form action="{% url 'delete_assessments' %}" method="POST" class="inline">
-                    {% csrf_token %}
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-auto shadow-sm hover:bg-red-700 focus:outline-none">
-                        Yes, Delete Everything
-                    </button>
-                </form>
-                <button onclick="closeDeleteModal()" class="ml-3 px-4 py-2 bg-gray-200 text-gray-900 text-base font-medium rounded-md w-auto shadow-sm hover:bg-gray-300 focus:outline-none">
-                    Cancel
-                </button>
+                <form action="{% url 'delete_assessments' %}" method="POST" class="inline">{% csrf_token %}<button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Yes, Delete Everything</button></form>
+                <button onclick="closeDeleteModal()" class="ml-3 px-4 py-2 bg-gray-200 rounded-md">Cancel</button>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    function openDeleteModal() {
-        document.getElementById('delete-modal').classList.remove('hidden');
-        feather.replace();
-    }
-    function closeDeleteModal() {
-        document.getElementById('delete-modal').classList.add('hidden');
-    }
+    function openDeleteModal() { document.getElementById('delete-modal').classList.remove('hidden'); feather.replace(); }
+    function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
 </script>
 {% endblock %}
 

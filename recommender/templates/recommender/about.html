@@ -1,0 +1,59 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}About AlignEd | AI Course Recommendation{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- hedear -->
+        <div class="text-center mb-12">
+            <div class="inline-block bg-indigo-100 p-4 rounded-full">
+                <i data-feather="info" class="w-10 h-10 text-indigo-600"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mt-4">About AlignEd</h1>
+            <p class="text-lg text-gray-600 mt-3">Guiding Students Towards a Brighter Future with AI</p>
+        </div>
+
+        <!-- misyown -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">Our Mission</h2>
+            <p class="text-gray-700 leading-relaxed">
+                Choosing a college course is one of the most significant decisions a student will make. At AlignEd, our mission is to simplify this process for the students of Ninoy Aquino Senior High School. We believe that by leveraging the power of Artificial Intelligence, we can provide personalized, data-driven recommendations that align a student's unique skills, interests, and abilities with the best possible academic path. Our goal is to empower students, reduce uncertainty, and help them take the first confident step towards a successful and fulfilling career.
+            </p>
+        </div>
+
+        <!-- hawitwarks -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-8 mt-6 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-full mb-3"><i data-feather="edit-3" class="w-8 h-8 text-gray-600"></i></div>
+                    <h3 class="font-bold text-lg">1. Take the Assessment</h3>
+                    <p class="text-sm text-gray-600 mt-1">Answer a series of engaging, multi-step questions about your interests and abilities.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-full mb-3"><i data-feather="cpu" class="w-8 h-8 text-gray-600"></i></div>
+                    <h3 class="font-bold text-lg">2. AI Analysis</h3>
+                    <p class="text-sm text-gray-600 mt-1">Our Random Forest model analyzes your unique profile against patterns from hundreds of data points.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-full mb-3"><i data-feather="award" class="w-8 h-8 text-gray-600"></i></div>
+                    <h3 class="font-bold text-lg">3. Get Recommendations</h3>
+                    <p class="text-sm text-gray-600 mt-1">Receive your top 3 course recommendations, complete with personalized insights and visualizations.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- awertim -->
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">The Development Team</h2>
+            <p class="text-gray-700">
+                This project was developed as a capstone requirement by a dedicated group of students passionate about technology and education.
+                <!-- You can add your team members' names here! -->
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
