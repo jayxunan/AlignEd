@@ -5,38 +5,49 @@
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    /* 1. Base Setup: Hides radio buttons and sets stars to gray */
+    /* 1. Base Setup (Reversed HTML order: 5 to 1) */
     .star-rating { 
         display: flex; 
-        flex-direction: row-reverse; /* CRITICAL: Flips display order (5 is now on the right) */
+        flex-direction: row-reverse; /* Reverses the display order (5 is on the right) */
         justify-content: center; 
     }
     .star-rating input[type="radio"] { display: none; }
     .star-rating label { 
         font-size: 2rem; 
-        color: #d1d5db; 
+        color: #d1d5db; /* Default: Gray */
         cursor: pointer; 
         transition: color 0.2s; 
     }
     
-    /* 2. FIX: CHECKED STATE */
-    /* When an input is checked, color that input's label AND all labels that follow it (which are the lower-rated stars visually to the left). This is the standard pure-CSS reverse order trick. */
-    .star-rating input:checked ~ label { 
-        color: #f59e0b; 
-    }
-    
-    /* 3. FIX: HOVER STATE (Ensures the live selection works correctly) */
-    /* Highlight the label being hovered over AND all labels that follow it. */
+    /* 2. HOVER STATE: Highlights current star and lower siblings */
     .star-rating label:hover,
     .star-rating label:hover ~ label {
         color: #f59e0b;
     }
+
+    /* 3. CHECKED STATE: Permanently highlights checked star and lower siblings */
+    /* This must work for the permanent selection BEFORE the disable class is applied */
+    .star-rating input:checked ~ label { 
+        color: #f59e0b; 
+    }
     
-    /* 4. POST-SUBMISSION STATE */
+    /* 4. FIX: DISABLE STATE (Post-Submission Visual Lock) */
+    /* When the rating is disabled, we set the color based ONLY on the checked input */
     .star-rating.is-disabled label { 
         cursor: default; 
-        color: #f59e0b !important; 
-        opacity: 0.6; 
+        color: #d1d5db !important; /* Force all labels back to gray */
+        opacity: 1;
+    }
+    
+    /* CRITICAL FIX: Only highlight labels that are siblings to a checked input within the disabled container */
+    .star-rating.is-disabled input:checked ~ label {
+        color: #f59e0b !important; /* Re-apply gold to checked and lower siblings */
+    }
+    
+    /* Optional: Ensure the hover effect is removed when disabled */
+    .star-rating.is-disabled label:hover,
+    .star-rating.is-disabled label:hover ~ label {
+        color: #d1d5db;
     }
 </style>
 
@@ -115,17 +126,19 @@
                     <li class="text-red-500">University list currently unavailable (DB not populated).</li>
                 {% endfor %}
             </ul>
-            </div>
+        </div>
         
         <div class="p-6 border-t bg-gray-50 rounded-b-2xl">
             <h4 class="font-bold text-center text-gray-600 mb-2">How accurate is this recommendation?</h4>
-            <div class="star-rating flex justify-center flex-row-reverse" data-rec-number="{{ forloop.counter }}">
+            
+            <div class="star-rating flex justify-center" data-rec-number="{{ forloop.counter }}">
                 <input type="radio" id="star5-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="5"><label for="star5-{{forloop.counter}}">★</label>
                 <input type="radio" id="star4-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="4"><label for="star4-{{forloop.counter}}">★</label>
                 <input type="radio" id="star3-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="3"><label for="star3-{{forloop.counter}}">★</label>
                 <input type="radio" id="star2-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="2"><label for="star2-{{forloop.counter}}">★</label>
                 <input type="radio" id="star1-{{forloop.counter}}" name="rating_{{forloop.counter}}" value="1"><label for="star1-{{forloop.counter}}">★</label>
             </div>
+            
             <p class="feedback-thanks text-center text-sm text-green-600 font-semibold mt-2" style="display: none;">Thanks for your feedback!</p>
         </div>
     </div>
@@ -198,14 +211,17 @@
                 const rating = event.target.value;
                 const recNumber = ratingGroup.dataset.recNumber;
                 
+                // 1. Visually lock the state
                 ratingGroup.classList.add('is-disabled');
                 ratingGroup.querySelectorAll('input').forEach(input => input.disabled = true);
 
+                // 2. Show thank you message
                 const thanksMessage = ratingGroup.nextElementSibling;
                 if (thanksMessage) {
                     thanksMessage.style.display = 'block';
                 }
 
+                // 3. Send feedback to server
                 fetch(`/submit-feedback/${assessmentId}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken, },
