@@ -105,6 +105,7 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
+EMAIL_TIMEOUT = 10
 
 LOGIN_URL = 'login'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
