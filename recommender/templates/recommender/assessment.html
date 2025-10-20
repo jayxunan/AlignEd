@@ -16,7 +16,6 @@
         <form action="{% url 'recommendation_result' %}" method="POST">
             {% csrf_token %}
 
-            <!-- info -->
             <div id="step-1">
                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">Let's Get Started!</h1><p class="text-gray-500 mt-2">Tell us a little bit about yourself.</p></div>
                 <div class="space-y-6 max-w-lg mx-auto">
@@ -28,40 +27,120 @@
                 <div class="mt-10 flex justify-end"><button type="button" onclick="nextStep(2)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-800">Next →</button></div>
             </div>
 
-            <!-- step2 -->
             <div id="step-2" class="hidden">
-                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What are you passionate about? 🎨</h1></div>
+                <div class="text-center mb-4">
+                    <h1 class="text-3xl font-bold text-gray-800">What are you passionate about? 🧠</h1>
+                    <p class="text-gray-500 mt-2 font-semibold">Rate your level of **Interest** (1 = Least Interest, 5 = Most Interest)</p>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for item in step2_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-indigo-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-indigo-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                    {% for item in step2_items %}
+                    <div class="bg-gray-50 border rounded-lg p-5">
+                        <div class="flex items-center mb-3">
+                            <i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-indigo-600"></i>
+                            <h3 class="font-bold text-gray-800">{{ item.label }}</h3>
+                        </div>
+                        <div class="flex items-center justify-around bg-gray-200 rounded-full p-1">
+                            {% for i in "12345" %}
+                            <label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full">
+                                <input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer">
+                                <span class="peer-checked:bg-indigo-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(1)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(3)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+                <div class="mt-10 flex justify-between">
+                    <button type="button" onclick="prevStep(1)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button>
+                    <button type="button" onclick="nextStep(3)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button>
+                </div>
             </div>
 
-            <!-- steptri -->
             <div id="step-3" class="hidden">
-                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What kind of work do you enjoy? 🛠️</h1></div>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for item in step3_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-teal-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-teal-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                <div class="text-center mb-4">
+                    <h1 class="text-3xl font-bold text-gray-800">What kind of work do you enjoy? 🛠️</h1>
+                    <p class="text-gray-500 mt-2 font-semibold">Rate your level of **Interest** (1 = Least Interest, 5 = Most Interest)</p>
                 </div>
-                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(2)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(4)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step3_items %}
+                    <div class="bg-gray-50 border rounded-lg p-5">
+                        <div class="flex items-center mb-3">
+                            <i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-teal-600"></i>
+                            <h3 class="font-bold text-gray-800">{{ item.label }}</h3>
+                        </div>
+                        <div class="flex items-center justify-around bg-gray-200 rounded-full p-1">
+                            {% for i in "12345" %}
+                            <label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full">
+                                <input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer">
+                                <span class="peer-checked:bg-teal-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between">
+                    <button type="button" onclick="prevStep(2)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button>
+                    <button type="button" onclick="nextStep(4)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button>
+                </div>
             </div>
 
-            <!-- step4 -->
             <div id="step-4" class="hidden">
-                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">How do you like to interact with others? 🤝</h1></div>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for item in step4_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-purple-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-purple-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
-                 </div>
-                 <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(3)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="button" onclick="nextStep(5)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button></div>
+                <div class="text-center mb-4">
+                    <h1 class="text-3xl font-bold text-gray-800">How do you like to interact with others? 🤝</h1>
+                    <p class="text-gray-500 mt-2 font-semibold">Rate your level of **Interest** (1 = Least Interest, 5 = Most Interest)</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step4_items %}
+                    <div class="bg-gray-50 border rounded-lg p-5">
+                        <div class="flex items-center mb-3">
+                            <i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-purple-600"></i>
+                            <h3 class="font-bold text-gray-800">{{ item.label }}</h3>
+                        </div>
+                        <div class="flex items-center justify-around bg-gray-200 rounded-full p-1">
+                            {% for i in "12345" %}
+                            <label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full">
+                                <input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer">
+                                <span class="peer-checked:bg-purple-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between">
+                    <button type="button" onclick="prevStep(3)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button>
+                    <button type="button" onclick="nextStep(5)" class="bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Next →</button>
+                </div>
             </div>
 
-            <!-- last -->
             <div id="step-5" class="hidden">
-                 <div class="text-center mb-8"><h1 class="text-3xl font-bold text-gray-800">What are your superpowers? 🦸</h1></div>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for item in step5_items %}<div class="bg-gray-50 border rounded-lg p-5"><div class="flex items-center mb-3"><i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-green-600"></i><h3 class="font-bold text-gray-800">{{ item.label }}</h3></div><div class="flex items-center justify-around bg-gray-200 rounded-full p-1">{% for i in "12345" %}<label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full"><input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer"><span class="peer-checked:bg-green-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span></label>{% endfor %}</div></div>{% endfor %}
+                <div class="text-center mb-4">
+                    <h1 class="text-3xl font-bold text-gray-800">What are your superpowers? 🦸</h1>
+                    <p class="text-gray-500 mt-2 font-semibold">Rate your **Ability** (1 = Weakest, 5 = Strongest)</p>
                 </div>
-                <div class="mt-10 flex justify-between"><button type="button" onclick="prevStep(4)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button><button type="submit" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700">Get Recommendation!</button></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for item in step5_items %}
+                    <div class="bg-gray-50 border rounded-lg p-5">
+                        <div class="flex items-center mb-3">
+                            <i data-feather="{{ item.icon }}" class="w-6 h-6 mr-3 text-green-600"></i>
+                            <h3 class="font-bold text-gray-800">{{ item.label }}</h3>
+                        </div>
+                        <div class="flex items-center justify-around bg-gray-200 rounded-full p-1">
+                            {% for i in "12345" %}
+                            <label class="flex items-center justify-center w-full h-10 cursor-pointer rounded-full">
+                                <input type="radio" name="{{ item.name }}" value="{{ i }}" required class="sr-only peer">
+                                <span class="peer-checked:bg-green-600 peer-checked:text-white font-bold w-full h-full flex items-center justify-center rounded-full">{{ i }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-10 flex justify-between">
+                    <button type="button" onclick="prevStep(4)" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg">← Back</button>
+                    <button type="submit" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700">Get Recommendation!</button>
+                </div>
             </div>
 
         </form>
@@ -73,6 +152,7 @@
     const steps = Array.from({length: totalSteps}, (_, i) => document.getElementById(`step-${i + 1}`));
     const progressBar = document.getElementById('progress-bar');
     const stepCounter = document.getElementById('step-counter');
+    // Note: Step labels remain the same as the fields were swapped, not the step's general theme.
     const stepLabels = ['About You', 'Academic & Creative', 'Practical & Technical', 'Interpersonal & Business', 'Your Abilities'];
 
     function showStep(stepNumber) {
@@ -81,10 +161,53 @@
         stepCounter.textContent = `Step ${stepNumber} of ${totalSteps}: ${stepLabels[stepNumber - 1]}`;
         feather.replace();
     }
-    function nextStep(stepNumber) { showStep(stepNumber); }
+    
+    // Validation function to ensure all required inputs in the current step are checked
+    function validateStep(stepNumber) {
+        // Step 1 only requires school and strand, handled by native HTML 'required'
+        if (stepNumber === 1) return true; 
+
+        const currentStep = document.getElementById(`step-${stepNumber}`);
+        const requiredRadios = currentStep.querySelectorAll('input[type="radio"][required]');
+        
+        const radioGroups = {};
+        requiredRadios.forEach(radio => {
+            const name = radio.name;
+            // Check if any radio button in the group is checked
+            radioGroups[name] = currentStep.querySelector(`input[name="${name}"]:checked`);
+        });
+
+        let isValid = true;
+        for (const name in radioGroups) {
+            if (!radioGroups[name]) {
+                isValid = false;
+                break;
+            }
+        }
+
+        if (!isValid) {
+            alert("Please rate all four items in this section before proceeding.");
+            return false;
+        }
+        return true;
+    }
+
+    function nextStep(stepNumber) { 
+        // Only validate if moving away from a rating step (Step 1 -> Step 2 is validated)
+        if (!validateStep(stepNumber - 1)) {
+            return; 
+        }
+        showStep(stepNumber); 
+    }
+    
     function prevStep(stepNumber) { showStep(stepNumber); }
-    document.getElementById('shs_strand').addEventListener('change', function() { document.getElementById('tvl_strand_div').classList.toggle('hidden', this.value !== 'TVL'); });
-    feather.replace();
+
+    // Logic for showing/hiding TVL strand dropdown
+    document.getElementById('shs_strand').addEventListener('change', function() { 
+        document.getElementById('tvl_strand_div').classList.toggle('hidden', this.value !== 'TVL'); 
+    });
+    
+    // Initialize the first step and icons
+    showStep(1); 
 </script>
 {% endblock %}
-

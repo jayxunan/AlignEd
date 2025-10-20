@@ -18,10 +18,10 @@
         <i data-feather="award" class="w-10 h-10 text-green-600"></i>
     </div>
     <h1 class="text-4xl font-bold text-gray-800">Here Are Your Personalized Recommendations!</h1>
-    <p class="text-lg text-gray-500 mt-3">We've analyzed your unique profile to find the courses that best match your talents and passions.</p>
+    <p class="text-lg text-gray-500 mt-3">We've analyzed your unique profile to find the courses that best match your talents and passions from top Manila universities.</p>
 </div>
 
-<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+<div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
     {% for rec in recommendations %}
     <div class="bg-white rounded-2xl shadow-lg flex flex-col h-full
         {% if forloop.counter == 1 %} border-4 border-indigo-600 {% else %} border-4 border-transparent {% endif %}">
@@ -46,13 +46,11 @@
             <div class="text-5xl font-black text-indigo-600 my-2">{{ rec.match_score }}</div>
         </div>
 
-        <!-- biswal -->
         <div class="px-4 py-6 bg-gray-50">
             <h3 class="text-center font-bold text-gray-700 mb-2">Your Profile vs. Ideal Profile</h3>
             <canvas id="chart-{{ forloop.counter }}" data-chart='{{ rec.insights.chart_data }}'></canvas>
         </div>
 
-        <!-- insights -->
         <div class="p-6 flex-grow">
             <h3 class="font-bold text-lg text-gray-800 mb-3">Why it's a good fit:</h3>
             <ul class="space-y-2 mb-6">
@@ -75,7 +73,23 @@
                 {% endfor %}
             </ul>
             {% endif %}
-        </div>
+            
+            <h3 class="font-bold text-lg text-gray-800 mt-6 mb-3 border-t pt-4">Where to Study:</h3>
+            <ul class="list-disc list-inside text-sm space-y-2 pl-4">
+                {% for uni in rec.universities %}
+                    <li class="flex justify-between items-center text-gray-700">
+                        <span>{{ uni.name }}</span>
+                        <a href="{% url 'university_info' uni_slug=uni.slug %}" 
+                           class="ml-4 text-indigo-600 hover:text-indigo-800 text-xs font-semibold underline flex-shrink-0">
+                            View Info
+                        </a>
+                    </li>
+                {% empty %}
+                    <li class="text-red-500">University list currently unavailable (DB not populated).</li>
+                {% endfor %}
+            </ul>
+            </div>
+        
         <div class="p-6 border-t bg-gray-50 rounded-b-2xl">
             <h4 class="font-bold text-center text-gray-600 mb-2">How accurate is this recommendation?</h4>
             <div class="star-rating flex justify-center flex-row-reverse" data-rec-number="{{ forloop.counter }}">
@@ -113,9 +127,36 @@
                         type: 'radar',
                         data: {
                             labels: chartData.labels,
-                            datasets: [{ label: 'Your Profile', data: chartData.user_scores, backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: 'rgba(99, 102, 241, 1)', borderWidth: 2, }, { label: 'Ideal Profile', data: chartData.ideal_scores, backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 1)', borderWidth: 2, }]
+                            datasets: [{ 
+                                label: 'Your Profile', 
+                                data: chartData.user_scores, 
+                                backgroundColor: 'rgba(99, 102, 241, 0.2)', 
+                                borderColor: 'rgba(99, 102, 241, 1)', 
+                                borderWidth: 2, 
+                            }, { 
+                                label: 'Ideal Profile', 
+                                data: chartData.ideal_scores, 
+                                backgroundColor: 'rgba(34, 197, 94, 0.2)', 
+                                borderColor: 'rgba(34, 197, 94, 1)', 
+                                borderWidth: 2, 
+                            }]
                         },
-                        options: { scales: { r: { beginAtZero: true, max: 5, ticks: { stepSize: 1, display: false }, pointLabels: { font: { size: 10 } } } }, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+                        options: { 
+                            scales: { 
+                                r: { 
+                                    beginAtZero: true, 
+                                    max: 5, 
+                                    ticks: { stepSize: 1, display: false }, 
+                                    pointLabels: { font: { size: 10 } } 
+                                } 
+                            }, 
+                            plugins: { 
+                                legend: { 
+                                    position: 'bottom', 
+                                    labels: { font: { size: 10 } } 
+                                } 
+                            } 
+                        }
                     });
                 } catch (e) { console.error("Failed to parse chart data:", e); }
             }
@@ -160,4 +201,3 @@
     });
 </script>
 {% endblock %}
-

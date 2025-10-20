@@ -27,5 +27,7 @@ urlpatterns = [
     path('admin-dashboard/courses/new/', views.course_create_view, name='course_create'),
     path('admin-dashboard/courses/<int:pk>/edit/', views.course_update_view, name='course_update'),
     path('admin-dashboard/courses/<int:pk>/delete/', views.course_delete_view, name='course_delete'),
+
+    path('university/<str:uni_slug>/', views.university_info_view, name='university_info'),
 ]
 
