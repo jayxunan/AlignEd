@@ -5,12 +5,39 @@
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+    /* 1. Base Setup: Hides radio buttons and sets stars to gray */
+    .star-rating { 
+        display: flex; 
+        flex-direction: row-reverse; /* CRITICAL: Flips display order (5 is now on the right) */
+        justify-content: center; 
+    }
     .star-rating input[type="radio"] { display: none; }
-    .star-rating label { font-size: 2rem; color: #d1d5db; cursor: pointer; transition: color 0.2s; }
-    .star-rating:not(.is-disabled):not(:hover) input:checked ~ label,
-    .star-rating:not(.is-disabled):hover input ~ label:hover,
-    .star-rating:not(.is-disabled):hover input ~ label:hover ~ label { color: #f59e0b; }
-    .star-rating.is-disabled label { cursor: default; color: #f59e0b !important; opacity: 0.6; }
+    .star-rating label { 
+        font-size: 2rem; 
+        color: #d1d5db; 
+        cursor: pointer; 
+        transition: color 0.2s; 
+    }
+    
+    /* 2. FIX: CHECKED STATE */
+    /* When an input is checked, color that input's label AND all labels that follow it (which are the lower-rated stars visually to the left). This is the standard pure-CSS reverse order trick. */
+    .star-rating input:checked ~ label { 
+        color: #f59e0b; 
+    }
+    
+    /* 3. FIX: HOVER STATE (Ensures the live selection works correctly) */
+    /* Highlight the label being hovered over AND all labels that follow it. */
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #f59e0b;
+    }
+    
+    /* 4. POST-SUBMISSION STATE */
+    .star-rating.is-disabled label { 
+        cursor: default; 
+        color: #f59e0b !important; 
+        opacity: 0.6; 
+    }
 </style>
 
 <div class="max-w-5xl mx-auto text-center">
