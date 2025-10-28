@@ -1,0 +1,10 @@
+# Ignore local Python environment files
+.env
+myenv/
+__pycache__/
+
+# Ignore database file
+db.sqlite3
+
+# Ignore compiled Python files
+*.pyc
