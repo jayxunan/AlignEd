@@ -24,8 +24,6 @@ class University(models.Model):
 
 class PersonaTemplate(models.Model):
     name = models.CharField(max_length=100, unique=True, help_text="The user-friendly persona label (e.g., 'Logical Problem Solver').")
-    
-    # Using JSONField to store the key_traits (list) and profile (dict) structures efficiently
     key_traits_json = models.JSONField(default=list, help_text="JSON list of key traits for weighting.")
     profile_json = models.JSONField(default=dict, help_text="JSON dictionary of ideal trait scores.")
     

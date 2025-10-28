@@ -25,19 +25,15 @@ BASE_DIR = os.path.dirname(__file__)
 FIELD_MODEL_PATH = os.path.join(BASE_DIR, 'field_model.joblib')
 ENCODERS_PATH = os.path.join(BASE_DIR, 'label_encoders.joblib')
 
-# Global variables to hold the loaded models
 FIELD_MODEL = None
 ENCODERS = None
 
 try:
-    # 1. Load the models only ONCE
     FIELD_MODEL = joblib.load(FIELD_MODEL_PATH)
     ENCODERS = joblib.load(ENCODERS_PATH)
     print("SUCCESS: ML Models and Encoders loaded successfully at startup.")
 except Exception as e:
-    # Print error to logs if model fails to load
     print(f"CRITICAL ERROR: Failed to load ML models: {e}")
-    # The application will still start, but the view will now fail gracefully.
 
 COURSE_PERSONAS = {
     # -----------------------------------------------------
@@ -231,7 +227,6 @@ def get_recommendations_from_assessment(assessment):
     top_courses_names = [assessment.recommended_course_1, assessment.recommended_course_2, assessment.recommended_course_3]
     top_courses_data = []
 
-    # Get the raw scores for scaling (requires finding the original top scores)
     ranked_courses_data = sorted(course_scores.items(), key=lambda item: item[1]['score'], reverse=True)
     top_score = ranked_courses_data[0][1]['score'] if ranked_courses_data else 0
 
@@ -274,10 +269,8 @@ def email_recommendations_view(request, assessment_id):
         try:
             assessment = get_object_or_404(Assessment, id=assessment_id)
             
-            # 1. Regenerate the data needed for the email (top 3 courses, insights, etc.)
             recommendations = get_recommendations_from_assessment(assessment)
 
-            # 2. Render the email template
             email_context = {
                 'recommendations': recommendations,
                 'student_name': assessment.name or 'Valued User',
@@ -295,7 +288,7 @@ def email_recommendations_view(request, assessment_id):
                 settings.ADMIN_EMAIL,
                 [recipient_email]
             )
-            email.content_subtype = "html" # Main content is now HTML
+            email.content_subtype = "html" 
             email.send()
 
             messages.success(request, f"Your results have been sent to {recipient_email}!")
@@ -460,9 +453,7 @@ def university_info_view(request, uni_slug):
     return render(request, 'recommender/university_info.html', context)
 
 def recommendation_view(request, assessment_id=None):
-    # Check if models were loaded globally; if not, return a server error
     if FIELD_MODEL is None or ENCODERS is None:
-        # Return a 500 status with an explanation
         return HttpResponseServerError("The recommendation system is offline: ML models failed to load at startup.")
 
     if request.method == 'POST':
@@ -473,7 +464,6 @@ def recommendation_view(request, assessment_id=None):
 
             form_data = request.POST
             
-            # --- Assessment Creation ---
             new_assessment = Assessment.objects.create(
                 name=form_data.get('name'), school=form_data.get('school'),
                 shs_strand=form_data.get('shs_strand'), tvl_strand=form_data.get('tvl_strand'),
@@ -487,7 +477,7 @@ def recommendation_view(request, assessment_id=None):
                 ability_comm=int(form_data.get('ability_comm', 0)), ability_practical=int(form_data.get('ability_practical', 0)),
             )
             
-            # --- Prediction Logic ---
+            # Prediction Logic 
             data_for_prediction = {feature: form_data.get(feature, 0) for feature in field_model.feature_names_in_}
             if 'tvl_strand' not in form_data or not data_for_prediction.get('tvl_strand'): data_for_prediction['tvl_strand'] = 'none'
 
@@ -506,7 +496,6 @@ def recommendation_view(request, assessment_id=None):
             top_3_field_indices = field_probabilities.argsort()[-3:][::-1]
             top_3_field_codes = field_model.classes_[top_3_field_indices]
             
-            # --- Scoring Logic ---
             user_ratings = {k: int(v) for k, v in form_data.items() if k.startswith(('interest_', 'ability_'))}
             all_qualifying_courses = Course.objects.filter(field_category__in=top_3_field_codes).prefetch_related('offering_universities')
             course_scores = {}
@@ -530,7 +519,6 @@ def recommendation_view(request, assessment_id=None):
             ranked_courses_data = sorted(course_scores.items(), key=lambda item: item[1]['score'], reverse=True)
             top_3_ranked_courses = ranked_courses_data[:3]
 
-            # --- Formatting Recommendations ---
             recommendations = []
             base_score = 80
             for i, (course, data) in enumerate(top_3_ranked_courses):
@@ -555,7 +543,6 @@ def recommendation_view(request, assessment_id=None):
                     'universities': uni_list
                 })
             
-            # --- Save Recommendation Results ---
             new_assessment.recommended_course_1 = recommendations[0]['course'] if recommendations else ''
             new_assessment.recommended_course_2 = recommendations[1]['course'] if len(recommendations) > 1 else ''
             new_assessment.recommended_course_3 = recommendations[2]['course'] if len(recommendations) > 2 else ''
@@ -564,11 +551,9 @@ def recommendation_view(request, assessment_id=None):
             return redirect('recommendation_result_with_id', assessment_id=new_assessment.id)
             
         except Exception as e:
-            # Catch errors during prediction, scoring, or saving
             error_msg = f"Recommendation System Error: {e}. Check AI models and database setup."
             return render(request, 'recommender/error.html', {'error_message': error_msg})
     
-    # --- GET Request Handling (Loading results by ID) ---
     if assessment_id is not None:
         try:
             assessment = get_object_or_404(Assessment, id=assessment_id)
@@ -585,7 +570,6 @@ def recommendation_view(request, assessment_id=None):
             error_msg = f"Error loading results: {e}"
             return render(request, 'recommender/error.html', {'error_message': error_message})
             
-    # Default case: user accessed /recommendation/ directly via GET without ID
     return redirect('assessment')
 
 def submit_feedback_view(request, assessment_id):
@@ -656,43 +640,75 @@ def admin_password_reset_request_view(request):
         return redirect('login') 
     return render(request, 'recommender/registration/password_reset_form.html')
 
+SENDER_EMAIL = settings.ADMIN_EMAIL
+
 def login_view(request):
     if request.user.is_authenticated: return redirect('admin_dashboard')
+    
     if request.method == 'POST' and '2fa_code' in request.POST:
         user_id = request.session.get('2fa_user_id')
         if not user_id: messages.error(request, 'Your session has expired.'); return redirect('login')
+        
         expiry_time_str = request.session.get('2fa_expiry')
         if datetime.now().isoformat() > expiry_time_str:
             messages.error(request, 'The verification code has expired.')
             del request.session['2fa_user_id'], request.session['2fa_code'], request.session['2fa_expiry']
             return redirect('login')
-        if request.POST.get('2fa_code') == request.session.get('2fa_code'):
+            
+        if str(request.POST.get('2fa_code')) == request.session.get('2fa_code'):
             try: user = User.objects.get(pk=user_id)
             except User.DoesNotExist: user = None
             if user:
                 login(request, user)
                 del request.session['2fa_user_id'], request.session['2fa_code'], request.session['2fa_expiry']
-                try: send_mail('AlignEd Admin Panel: Successful Login', f"The user '{user.username}' successfully logged in.", settings.EMAIL_HOST_USER, [settings.ADMIN_EMAIL])
+                
+                try: 
+                    send_mail('AlignEd Admin Panel: Successful Login', 
+                              f"The user '{user.username}' successfully logged in.", 
+                              SENDER_EMAIL, 
+                              [SENDER_EMAIL]) 
                 except Exception as e: print(f"Error sending login email: {e}")
+                
                 return redirect('admin_dashboard')
         else:
             messages.error(request, 'Invalid verification code.')
             return render(request, 'recommender/login.html', {'awaiting_2fa': True})
+            
     if request.method == 'POST' and 'username' in request.POST:
         user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
         if user is not None and user.is_superuser:
             grace_period_key = f'grace_period_user_{user.id}'
-            if cache.get(grace_period_key): login(request, user); cache.delete(grace_period_key); return redirect('admin_dashboard') 
+            if cache.get(grace_period_key): 
+                login(request, user)
+                cache.delete(grace_period_key)
+                return redirect('admin_dashboard') 
+                
             code, expiry_time = str(random.randint(10000, 99999)), datetime.now() + timedelta(minutes=3)
             request.session['2fa_user_id'], request.session['2fa_code'], request.session['2fa_expiry'] = user.id, code, expiry_time.isoformat()
+            
             try:
-                send_mail('Your AlignEd Admin Login Code', f'Your verification code is: {code}', settings.EMAIL_HOST_USER, [settings.ADMIN_EMAIL])
+                send_mail('Your AlignEd Admin Login Code', 
+                          f'Your verification code is: {code}', 
+                          SENDER_EMAIL, # <--- FIXED SENDER ADDRESS
+                          [SENDER_EMAIL])
                 messages.success(request, 'A verification code has been sent to your email.')
-            except Exception as e: messages.error(request, 'Failed to send email.'); print(f"Error sending 2FA email: {e}")
+            except Exception as e: 
+                messages.error(request, 'Failed to send email.')
+                print(f"Error sending 2FA email: {e}")
+            
             return render(request, 'recommender/login.html', {'awaiting_2fa': True})
         else: messages.error(request, 'Invalid credentials or not an admin account.')
+        
     if '2fa_user_id' in request.session: del request.session['2fa_user_id']
     return render(request, 'recommender/login.html', {'awaiting_2fa': False})
+
+def logout_view(request):
+    if request.user.is_authenticated:
+        user_id = request.user.id
+        logout(request)
+        cache.set(f'grace_period_user_{user_id}', True, timeout=45)
+        messages.success(request, 'You have been successfully logged out.')
+    return redirect('dashboard')
 
 def logout_view(request):
     if request.user.is_authenticated:
@@ -742,7 +758,6 @@ def admin_dashboard_view(request):
         'total_assessments_count': total_assessments,
         'total_feedback_count': total_feedback_submissions,
         
-        # FINAL METRICS: Aligned Naming
         'average_user_satisfaction': avg_user_satisfaction,             
         'overall_score_percentage': overall_score_percentage,
         'top_match_average_score': top_match_average_score,
