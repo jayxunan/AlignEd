@@ -19,6 +19,24 @@ from .models import Assessment, Course, University, PersonaTemplate, CoursePerso
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
+BASE_DIR = os.path.dirname(__file__)
+FIELD_MODEL_PATH = os.path.join(BASE_DIR, 'field_model.joblib')
+ENCODERS_PATH = os.path.join(BASE_DIR, 'label_encoders.joblib')
+
+# Global variables to hold the loaded models
+FIELD_MODEL = None
+ENCODERS = None
+
+try:
+    # 1. Load the models only ONCE
+    FIELD_MODEL = joblib.load(FIELD_MODEL_PATH)
+    ENCODERS = joblib.load(ENCODERS_PATH)
+    print("SUCCESS: ML Models and Encoders loaded successfully at startup.")
+except Exception as e:
+    # Print error to logs if model fails to load
+    print(f"CRITICAL ERROR: Failed to load ML models: {e}")
+    # The application will still start, but the view will now fail gracefully.
+
 COURSE_PERSONAS = {
     # -----------------------------------------------------
     # TECHNOLOGY, COMPUTING, & DATA
@@ -439,20 +457,21 @@ def university_info_view(request, uni_slug):
     }
     return render(request, 'recommender/university_info.html', context)
 
-def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional assessment_id
-    import pandas as pd
-    import joblib
-    
+def recommendation_view(request, assessment_id=None):
+    # Check if models were loaded globally; if not, return a server error
+    if FIELD_MODEL is None or ENCODERS is None:
+        # Return a 500 status with an explanation
+        return HttpResponseServerError("The recommendation system is offline: ML models failed to load at startup.")
+
     if request.method == 'POST':
         try:
-            field_model_path = os.path.join(os.path.dirname(__file__), 'field_model.joblib')
-            encoders_path = os.path.join(os.path.dirname(__file__), 'label_encoders.joblib')
-            
-            field_model = joblib.load(field_model_path)
-            encoders = joblib.load(encoders_path)
-            
+            # Use the pre-loaded global models/encoders
+            field_model = FIELD_MODEL
+            encoders = ENCODERS
+
             form_data = request.POST
             
+            # --- Assessment Creation ---
             new_assessment = Assessment.objects.create(
                 name=form_data.get('name'), school=form_data.get('school'),
                 shs_strand=form_data.get('shs_strand'), tvl_strand=form_data.get('tvl_strand'),
@@ -466,6 +485,7 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
                 ability_comm=int(form_data.get('ability_comm', 0)), ability_practical=int(form_data.get('ability_practical', 0)),
             )
             
+            # --- Prediction Logic ---
             data_for_prediction = {feature: form_data.get(feature, 0) for feature in field_model.feature_names_in_}
             if 'tvl_strand' not in form_data or not data_for_prediction.get('tvl_strand'): data_for_prediction['tvl_strand'] = 'none'
 
@@ -484,6 +504,7 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
             top_3_field_indices = field_probabilities.argsort()[-3:][::-1]
             top_3_field_codes = field_model.classes_[top_3_field_indices]
             
+            # --- Scoring Logic ---
             user_ratings = {k: int(v) for k, v in form_data.items() if k.startswith(('interest_', 'ability_'))}
             all_qualifying_courses = Course.objects.filter(field_category__in=top_3_field_codes).prefetch_related('offering_universities')
             course_scores = {}
@@ -507,6 +528,7 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
             ranked_courses_data = sorted(course_scores.items(), key=lambda item: item[1]['score'], reverse=True)
             top_3_ranked_courses = ranked_courses_data[:3]
 
+            # --- Formatting Recommendations ---
             recommendations = []
             base_score = 80
             for i, (course, data) in enumerate(top_3_ranked_courses):
@@ -531,6 +553,7 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
                     'universities': uni_list
                 })
             
+            # --- Save Recommendation Results ---
             new_assessment.recommended_course_1 = recommendations[0]['course'] if recommendations else ''
             new_assessment.recommended_course_2 = recommendations[1]['course'] if len(recommendations) > 1 else ''
             new_assessment.recommended_course_3 = recommendations[2]['course'] if len(recommendations) > 2 else ''
@@ -539,9 +562,11 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
             return redirect('recommendation_result_with_id', assessment_id=new_assessment.id)
             
         except Exception as e:
+            # Catch errors during prediction, scoring, or saving
             error_msg = f"Recommendation System Error: {e}. Check AI models and database setup."
             return render(request, 'recommender/error.html', {'error_message': error_msg})
     
+    # --- GET Request Handling (Loading results by ID) ---
     if assessment_id is not None:
         try:
             assessment = get_object_or_404(Assessment, id=assessment_id)
@@ -556,7 +581,7 @@ def recommendation_view(request, assessment_id=None): # <-- FIX 1: Add optional 
             return redirect('assessment')
         except Exception as e:
             error_msg = f"Error loading results: {e}"
-            return render(request, 'recommender/error.html', {'error_message': error_msg})
+            return render(request, 'recommender/error.html', {'error_message': error_message})
             
     # Default case: user accessed /recommendation/ directly via GET without ID
     return redirect('assessment')
