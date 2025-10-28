@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'sendgrid_backend',
+    'sendgrid_backend'
 ]
 
 MIDDLEWARE = [
@@ -98,17 +98,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 2fa
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False") == "True"
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
-EMAIL_TIMEOUT = 10
+# 2fa (Cleaned and Minimal SendGrid API Settings)
+# Email / SendGrid settings
+# In your settings.py:
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY") # This is the correct variable name
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL") # Used as the verified 'from' address
+EMAIL_TIMEOUT = 10 
+# Note: All SMTP variables (EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, etc.) have been removed.
 
 LOGIN_URL = 'login'
 CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}

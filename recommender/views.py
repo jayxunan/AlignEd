@@ -292,7 +292,7 @@ def email_recommendations_view(request, assessment_id):
             email = EmailMessage(
                 subject,
                 html_message,
-                settings.EMAIL_HOST_USER,
+                settings.ADMIN_EMAIL,
                 [recipient_email]
             )
             email.content_subtype = "html" # Main content is now HTML
@@ -682,7 +682,7 @@ def login_view(request):
         user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
         if user is not None and user.is_superuser:
             grace_period_key = f'grace_period_user_{user.id}'
-            if cache.get(grace_period_key): login(request, user); cache.delete(grace_period_key); return redirect('admin_dashboard')
+            if cache.get(grace_period_key): login(request, user); cache.delete(grace_period_key); return redirect('admin_dashboard') 
             code, expiry_time = str(random.randint(10000, 99999)), datetime.now() + timedelta(minutes=3)
             request.session['2fa_user_id'], request.session['2fa_code'], request.session['2fa_expiry'] = user.id, code, expiry_time.isoformat()
             try:
