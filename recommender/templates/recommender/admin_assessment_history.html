@@ -1,0 +1,171 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}Assessment History | Admin{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+<header class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Assessment History Log</h1>
+    <p class="text-gray-500 mt-1">Review all student assessments taken on the system (Showing {{ assessments.start_index }} - {{ assessments.end_index }} of {{ assessments.paginator.count }}).</p>
+</header>
+
+<div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Filter Results</h2>
+    
+    <form method="GET" class="flex flex-wrap items-end gap-4">
+        
+        <input type="hidden" name="sort" value="{{ current_sort }}">
+        
+        <div>
+            <label for="strand-filter" class="block text-sm font-medium text-gray-700">Filter by SHS Strand</label>
+            <select id="strand-filter" name="strand" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="all" {% if not selected_strand or selected_strand == 'all' %}selected{% endif %}>All Strands</option>
+                {% for strand in all_strands %}
+                    <option value="{{ strand }}" {% if selected_strand == strand %}selected{% endif %}>{{ strand }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div>
+            <label for="date-filter" class="block text-sm font-medium text-gray-700">Start Date (On or After)</label>
+            <input type="date" id="date-filter" name="date_filter" value="{{ date_filter_value|default:'' }}" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Apply Filters
+        </button>
+        
+        <a href="{% url 'assessment_history' %}?sort=-timestamp" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+            Clear Filters
+        </a>
+    </form>
+</div>
+
+<div class="bg-white rounded-2xl shadow-lg p-6">
+    {% if assessments.paginator.count > 0 %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {# --- Date Sorting Link --- #}
+                        {% with date_sort_param=current_sort %}
+                            {% if date_sort_param == '-timestamp' %}
+                                <a href="?sort=timestamp&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">Date <i data-feather="chevron-down" class="w-4 h-4 ml-1"></i></a>
+                            {% elif date_sort_param == 'timestamp' %}
+                                <a href="?sort=-timestamp&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">Date <i data-feather="chevron-up" class="w-4 h-4 ml-1"></i></a>
+                            {% else %}
+                                <a href="?sort=-timestamp&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">Date</a>
+                            {% endif %}
+                        {% endwith %}
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {# --- SHS Strand Sorting Link --- #}
+                        {% with strand_sort_param=current_sort %}
+                            {% if strand_sort_param == 'shs_strand' %}
+                                <a href="?sort=-shs_strand&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">SHS Strand <i data-feather="chevron-up" class="w-4 h-4 ml-1"></i></a>
+                            {% elif strand_sort_param == '-shs_strand' %}
+                                <a href="?sort=shs_strand&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">SHS Strand <i data-feather="chevron-down" class="w-4 h-4 ml-1"></i></a>
+                            {% else %}
+                                <a href="?sort=shs_strand&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="flex items-center hover:text-gray-900">SHS Strand</a>
+                            {% endif %}
+                        {% endwith %}
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rec 1 (Feedback)</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rec 2 (Feedback)</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rec 3 (Feedback)</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for assessment in assessments %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ assessment.timestamp|date:"M d, Y H:i" }}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                        {{ assessment.name|default:"Anonymous" }}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ assessment.school }}
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ assessment.shs_strand }}{% if assessment.tvl_strand and assessment.shs_strand == 'TVL' %} ({{ assessment.tvl_strand }}){% endif %}
+                    </td>
+                    
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span class="font-semibold">{{ assessment.recommended_course_1|default:"N/A" }}</span>
+                        {% if assessment.feedback_rating_1 %}
+                            <span class="text-xs font-bold text-yellow-600 block">({{ assessment.feedback_rating_1 }}/5)</span>
+                        {% else %}
+                            <span class="text-xs text-gray-400 block">(No rating)</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span class="font-semibold">{{ assessment.recommended_course_2|default:"N/A" }}</span>
+                        {% if assessment.feedback_rating_2 %}
+                            <span class="text-xs font-bold text-yellow-600 block">({{ assessment.feedback_rating_2 }}/5)</span>
+                        {% else %}
+                            <span class="text-xs text-gray-400 block">(No rating)</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span class="font-semibold">{{ assessment.recommended_course_3|default:"N/A" }}</span>
+                        {% if assessment.feedback_rating_3 %}
+                            <span class="text-xs font-bold text-yellow-600 block">({{ assessment.feedback_rating_3 }}/5)</span>
+                        {% else %}
+                            <span class="text-xs text-gray-400 block">(No rating)</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# --- Pagination Controls (Must preserve filters in links) --- #}
+    {% if assessments.has_other_pages %}
+    <div class="mt-6 flex justify-between items-center">
+        <div>
+            {% if assessments.has_previous %}
+                <a href="?page={{ assessments.previous_page_number }}&sort={{ current_sort }}&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="px-4 py-2 text-sm font-medium rounded-lg text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition-colors">
+                    Previous
+                </a>
+            {% else %}
+                <span class="px-4 py-2 text-sm font-medium rounded-lg text-gray-400 border border-gray-300">Previous</span>
+            {% endif %}
+        </div>
+
+        <span class="text-sm text-gray-700">
+            Page <span class="font-medium">{{ assessments.number }}</span> of <span class="font-medium">{{ assessments.paginator.num_pages }}</span>
+        </span>
+
+        <div>
+            {% if assessments.has_next %}
+                <a href="?page={{ assessments.next_page_number }}&sort={{ current_sort }}&strand={{ selected_strand|default:'all' }}&date_filter={{ date_filter_value|default:'' }}" class="px-4 py-2 text-sm font-medium rounded-lg text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition-colors">
+                    Next
+                </a>
+            {% else %}
+                <span class="px-4 py-2 text-sm font-medium rounded-lg text-gray-400 border border-gray-300">Next</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-10 text-gray-500">
+        <i data-feather="clock" class="w-10 h-10 mx-auto mb-3"></i>
+        <p>No assessment records have been found yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    feather.replace();
+</script>
+{% endblock %}

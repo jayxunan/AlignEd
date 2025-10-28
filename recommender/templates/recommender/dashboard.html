@@ -3,6 +3,7 @@
 {% block title %}Dashboard | AlignEd AI{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     @keyframes pulse {
         0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
@@ -18,15 +19,21 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
+    .metric-icon-bg {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px; 
+    }
 </style>
 
-<!-- taas -->
 <header class="mb-8 hidden md:block">
     <h1 class="text-3xl font-bold text-gray-800">Welcome to Aligned!</h1>
     <p class="text-gray-500 mt-1">Let's explore your future course choice.</p>
 </header>
 
-<!-- kahon -->
 <section class="bg-white rounded-2xl shadow-lg p-8 mb-8 flex flex-col md:flex-row items-center justify-between overflow-hidden">
     <div class="md:w-1/2 text-center md:text-left mb-8 md:mb-0">
         <h2 class="text-4xl font-black text-gray-900 leading-tight mb-4">Find Your <span class="text-indigo-600">Future Course</span>.</h2>
@@ -54,60 +61,141 @@
     </div>
 </section>
 
-<!-- statsa -->
 <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="card-hover bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg">
+    
+    <div class="card-hover bg-white text-gray-800 p-6 rounded-2xl shadow-lg">
         <div class="flex items-center space-x-4">
-            <div class="bg-white/20 p-3 rounded-full"><i data-feather="book-open" class="text-white"></i></div>
+            <div class="metric-icon-bg bg-blue-100"><i data-feather="book-open" class="text-blue-600 w-6 h-6"></i></div>
             <div>
-                <p class="text-blue-200">Available Courses</p>
-                <p class="text-3xl font-bold">{{ available_courses_count|default:"0" }}</p>
+                <p class="text-gray-500 font-medium">Available Courses</p>
+                <p class="text-4xl font-black mt-1">{{ available_courses_count|default:"0" }}</p>
             </div>
         </div>
     </div>
-    <div class="card-hover bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-lg">
-        <div class="flex items-center space-x-4">
-            <div class="bg-white/20 p-3 rounded-full"><i data-feather="users" class="text-white"></i></div>
-            <div>
-                <p class="text-green-200">Assessments Taken</p>
-                <p class="text-3xl font-bold">{{ total_assessments_count|default:"0" }}</p>
-            </div>
+    
+    <div class="card-hover bg-white p-6 rounded-2xl shadow-lg md:row-span-1 md:col-span-1">
+        <h3 class="font-bold text-gray-800 mb-2 text-center">Assessments by SHS Strand</h3>
+        <p class="text-xs text-gray-500 text-center mb-4">Total Assessments: {{ total_assessments_count|default:"0" }}</p>
+        <div class="h-48">
+            <canvas id="strandDistributionChart"></canvas>
         </div>
     </div>
-    <div class="card-hover bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg">
+
+    <div class="card-hover bg-white text-gray-800 p-6 rounded-2xl shadow-lg">
         <div class="flex items-center space-x-4">
-            <div class="bg-white/20 p-3 rounded-full"><i data-feather="thumbs-up" class="text-white"></i></div>
+             <div class="metric-icon-bg bg-green-100"><i data-feather="thumbs-up" class="text-green-600 w-6 h-6"></i></div>
             <div>
-                <p class="text-purple-200">Feedback Agreement</p>
-                <p class="text-3xl font-bold">{{ feedback_agreement_score|floatformat:1 }}%</p>
+                <p class="text-gray-500 font-medium">Feedback Agreement Score</p>
+                 <p class="text-4xl font-black mt-1">{{ feedback_agreement_score|floatformat:1 }}%</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- top -->
-<section>
+<section class="mb-8">
     <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Top Recommended Courses</h2>
+        <h2 class="text-xl font-bold text-gray-800">Top 3 Most Recommended Courses</h2>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {% for course in top_recommended_courses %}
-        <div class="card-hover bg-white rounded-2xl p-6 shadow-md">
-            <div class="flex justify-between items-start">
-                <div>
-                    <span class="text-xs font-bold uppercase text-indigo-500">#{{ forloop.counter }} Most Recommended</span>
-                    <h3 class="font-bold text-lg text-gray-800 mt-1">{{ course.name }}</h3>
-                </div>
-                <div class="bg-indigo-100 p-2 rounded-full">
-                    <i data-feather="{{ course.icon }}" class="text-indigo-600 w-5 h-5"></i>
-                </div>
-            </div>
-            <p class="text-sm text-gray-500 mt-3">{{ course.count }} total recommendations</p>
-        </div>
-        {% empty %}
-        <p class="text-gray-500 col-span-3 bg-white p-6 rounded-2xl text-center">No assessments have been taken yet.</p>
-        {% endfor %}
+    <div id="top-courses-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% if total_assessments_count > 0 %}
+            <p class="text-gray-500 col-span-3 bg-white p-6 rounded-2xl text-center">Loading top course statistics...</p>
+        {% else %}
+            <p class="text-gray-500 col-span-3 bg-white p-6 rounded-2xl text-center">No assessments have been taken yet.</p>
+        {% endif %}
     </div>
 </section>
-{% endblock %}
 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const strandDataString = '{{ strand_data_json|safe }}';
+        
+        if (strandDataString && strandDataString.length > 2) {
+            const strandData = JSON.parse(strandDataString);
+            const labels = strandData.map(d => d.shs_strand);
+            const data = strandData.map(d => d.count);
+            
+            new Chart(document.getElementById('strandDistributionChart').getContext('2d'), {
+                type: 'bar', // Horizontal bar chart
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Assessments',
+                        data: data,
+                        backgroundColor: [
+                            '#FCD34D', // HUMSS
+                            '#4F46E5', // STEM 
+                            '#F87171', // TVL 
+                            '#34D399', // ABM
+                            '#60A5FA'  // GAS
+                        ],
+                        borderColor: '#E5E7EB',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // bar chatr horizontal
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        y: {
+                            // hide grid
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // hide legend
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        const topCoursesDataString = '{{ top_recommended_courses_json|safe }}';
+        const listContainer = document.getElementById('top-courses-list');
+        listContainer.innerHTML = ''; 
+        
+        if (topCoursesDataString && topCoursesDataString.length > 2) {
+            const topCoursesData = JSON.parse(topCoursesDataString);
+            
+            topCoursesData.forEach((course, index) => {
+                const card = `
+                    <div class="card-hover bg-white rounded-2xl p-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold uppercase text-indigo-500">#${index + 1} Most Recommended</span>
+                                <h3 class="font-bold text-lg text-gray-800 mt-1">${course.name}</h3>
+                            </div>
+                            <div class="bg-indigo-100 p-2 rounded-full">
+                                <i data-feather="${course.icon}" class="text-indigo-600 w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-3">${course.count} total recommendations</p>
+                    </div>
+                `;
+                listContainer.innerHTML += card;
+            });
+        } else if ('{{ total_assessments_count }}' === '0') {
+             listContainer.innerHTML = '<p class="text-gray-500 col-span-3 bg-white p-6 rounded-2xl text-center">No assessments have been taken yet.</p>';
+        }
+
+        feather.replace();
+    });
+</script>
+{% endblock %}

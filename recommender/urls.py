@@ -27,7 +27,11 @@ urlpatterns = [
     path('admin-dashboard/courses/new/', views.course_create_view, name='course_create'),
     path('admin-dashboard/courses/<int:pk>/edit/', views.course_update_view, name='course_update'),
     path('admin-dashboard/courses/<int:pk>/delete/', views.course_delete_view, name='course_delete'),
+    path('admin-dashboard/history/', views.assessment_history_view, name='assessment_history'),
 
     path('university/<str:uni_slug>/', views.university_info_view, name='university_info'),
+    path('email-results/<int:assessment_id>/', views.email_recommendations_view, name='email_recommendations'),
+    path('recommendation/', views.recommendation_view, name='recommendation_result'),
+    path('recommendation/<int:assessment_id>/', views.recommendation_view, name='recommendation_result_with_id'),
 ]
 

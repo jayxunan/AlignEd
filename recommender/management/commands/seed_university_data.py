@@ -149,8 +149,6 @@ class Command(BaseCommand):
     help = 'Seeds the database with final University and Course data, and links them.'
 
     def handle(self, *args, **options):
-        # A map to convert short university codes to their full name for linking
-        # This helper map is essential for reliable lookups
         UNI_CODE_MAP = {
             "UP": "University of the Philippines (UP)",
             "DLSU": "De La Salle University (DLSU)",
@@ -179,16 +177,13 @@ class Command(BaseCommand):
                 
                 self.stdout.write(self.style.SUCCESS(f"   -> {len(uni_objects)} Universities confirmed."))
 
-                # --- 2. Seed Courses and Link to Universities ---
                 self.stdout.write("\n2. Seeding FINAL Courses and creating links...")
                 courses_added = 0
                 links_created = 0
 
-                # Clear existing course data first to ensure we only have the final ~85 courses
                 Course.objects.all().delete()
                 
                 for course_name, (field_code, uni_codes) in COURSE_DATA.items():
-                    # Create the Course object
                     course, created = Course.objects.get_or_create(
                         name=course_name,
                         defaults={
@@ -202,7 +197,6 @@ class Command(BaseCommand):
                     if created:
                         courses_added += 1
                     
-                    # Link the Course to the Universities
                     course.offering_universities.clear() 
                     
                     for uni_code in uni_codes:
