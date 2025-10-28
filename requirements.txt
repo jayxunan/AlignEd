@@ -9,3 +9,4 @@ scikit-learn==1.4.2
 joblib==1.4.0
 reportlab==4.1.0
 matplotlib==3.8.4
+sendgrid-django
