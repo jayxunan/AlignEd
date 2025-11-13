@@ -1,0 +1,32 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}Assessment #{{ assessment.id }} Answers{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Assessment Details</h1>
+    <p class="text-gray-500 mt-1">Taken on {{ assessment.timestamp|date:"F d, Y, h:i A" }}</p>
+</header>
+
+<div class="bg-white p-6 rounded-2xl shadow-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your Selected Answers (1 = Lowest, 5 = Highest)</h2>
+    
+    <div class="grid grid-cols-1 gap-4">
+        {% for item in formatted_answers %}
+        <div class="bg-gray-50 p-4 rounded-lg flex justify-between items-start border">
+            <span class="text-sm text-gray-700 mr-4">{{ item.question }}</span>
+            <span class="text-lg font-bold flex-shrink-0 ml-4 
+                {% if item.score > 3 %}text-green-600{% elif item.score < 3 %}text-red-500{% else %}text-gray-500{% endif %}">
+                {{ item.score }} / 5
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-8 text-center">
+        <a href="{% url 'user_history' %}" class="inline-block bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors">
+            ← Back to History
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}User Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Account Settings</h1>
+        <p class="text-gray-500 mt-2">Update your profile. Changes to Name, Email, or Password require email verification.</p>
+    </div>
+
+    <form method="POST" action="{% url 'user_settings' %}">
+        {% csrf_token %}
+        
+        <div class="space-y-6">
+            
+            {# Username (Read Only) #}
+            <div class="p-4 bg-gray-100 rounded-lg">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Username (Read Only)</label>
+                <p class="text-gray-800 font-semibold">{{ user.username }}</p>
+            </div>
+
+            {# Main Form Fields Loop #}
+            {% for field in form %}
+                {% if field.name == 'new_password' or field.name == 'confirm_password' %}
+                    {# Separate Password Section #}
+                    {% if field.name == 'new_password' %}
+                        <div class="pt-4 border-t border-gray-200">
+                            <h2 class="text-xl font-semibold mb-4">Password Change (Optional)</h2>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ field.label }}
+                        </label>
+                        <input type="password" 
+                               id="{{ field.id_for_label }}" 
+                               name="{{ field.name }}" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        {% if field.errors %}
+                            <p class="text-red-500 text-xs italic mt-1">{{ field.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if field.name == 'confirm_password' %}
+                        <p class="text-sm text-gray-500 italic mb-4">Leave both password fields empty if you do not wish to change your password.</p>
+                    {% endif %}
+                
+                {% else %}
+                    {# Standard Field Rendering (Name, Email, Profile Fields) #}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ field.label }}
+                            {% if field.name == 'email' or field.name == 'name' %}
+                                <span class="text-red-500">* Requires confirmation.</span>
+                            {% endif %}
+                        </label>
+                        
+                        {% if field.field.widget.input_type == 'select' %}
+                            {{ field }}
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type }}" 
+                                   id="{{ field.id_for_label }}" 
+                                   name="{{ field.name }}" 
+                                   value="{{ field.value|default:field.initial }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            <p class="text-red-500 text-xs italic mt-1">{{ field.errors }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+
+        <button type="submit" class="w-full bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-800 mt-6">
+            Save Changes & Send Verification Code
+        </button>
+    </form>
+</div>
+{% endblock %}

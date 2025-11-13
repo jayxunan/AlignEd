@@ -30,7 +30,15 @@
 </style>
 
 <header class="mb-8 hidden md:block">
-    <h1 class="text-3xl font-bold text-gray-800">Welcome to Aligned!</h1>
+    <h1 class="text-3xl font-bold text-gray-800">
+        {# START OF FIX: Personalized Greeting #}
+        {% if user.is_authenticated and user.userprofile.name %}
+            Welcome to AlignEd, {{ user.userprofile.name }}!
+        {% else %}
+            Welcome to AlignEd!
+        {% endif %}
+        {# END OF FIX #}
+    </h1>
     <p class="text-gray-500 mt-1">Let's explore your future course choice.</p>
 </header>
 
@@ -83,10 +91,10 @@
 
     <div class="card-hover bg-white text-gray-800 p-6 rounded-2xl shadow-lg">
         <div class="flex items-center space-x-4">
-             <div class="metric-icon-bg bg-green-100"><i data-feather="thumbs-up" class="text-green-600 w-6 h-6"></i></div>
+               <div class="metric-icon-bg bg-green-100"><i data-feather="thumbs-up" class="text-green-600 w-6 h-6"></i></div>
             <div>
                 <p class="text-gray-500 font-medium">Feedback Agreement Score</p>
-                 <p class="text-4xl font-black mt-1">{{ feedback_agreement_score|floatformat:1 }}%</p>
+                   <p class="text-4xl font-black mt-1">{{ feedback_agreement_score|floatformat:1 }}%</p>
             </div>
         </div>
     </div>

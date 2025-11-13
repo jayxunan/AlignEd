@@ -1,0 +1,102 @@
+{% extends 'recommender/base.html' %}
+{% load static %}
+
+{% block title %}User Login{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-10rem)]">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+        <div class="text-center">
+            <div class="inline-block bg-indigo-100 p-4 rounded-full mb-4">
+                <i data-feather="user" class="w-8 h-8 text-indigo-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800">Welcome to AlignEd</h1>
+            <p class="text-gray-500 mt-2">Sign in to access the user dashboard.</p>
+        </div>
+        
+        <form class="space-y-6" method="POST">
+            {% csrf_token %}
+            
+            {# Error Messages (Django messages) - Display here for better visibility #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# Username Field #}
+            <div>
+                <label for="id_username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input id="id_username" name="username" type="text" required 
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            {# Password Field with Show/Hide Button #}
+            <div>
+                <label for="id_password" class="block text-sm font-medium text-gray-700">Password</label>
+                <div class="mt-1 relative">
+                    <input id="id_password" name="password" type="password" required 
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                        <i id="eye-icon" data-feather="eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                {# Forgot Password Link #}
+                <div class="text-sm">
+                    {# NOTE: password_reset points to your admin reset request view in your main urls.py #}
+                    <a href="{% url 'user_password_reset' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                        Forgot your password?
+                    </a>
+                </div>
+                
+                {# Empty space to align links #}
+                <div></div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Sign In
+                </button>
+            </div>
+        </form>
+        
+        <p class="text-center text-sm text-gray-500 mt-6">
+            Don't have an account? <a href="{% url 'register' %}" class="font-medium text-indigo-600 hover:text-indigo-500">Register now</a>.
+        </p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Show/Hide Password Logic (Identical to Admin Login) ---
+        const togglePassword = document.querySelector('#toggle-password');
+        const passwordInput = document.querySelector('#id_password');
+        const eyeIcon = document.querySelector('#eye-icon');
+
+        if (togglePassword && passwordInput) {
+            // Initialize Feather icon set (needed because it's called after DOM load)
+            feather.replace(); 
+
+            togglePassword.addEventListener('click', function (e) {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle the eye icon visual
+                const iconElement = document.querySelector('#eye-icon');
+                if (iconElement) {
+                    iconElement.setAttribute('data-feather', type === 'password' ? 'eye' : 'eye-off');
+                    feather.replace();
+                }
+            });
+        }
+        // Feather icons are replaced again at the end of base.html, but doing it here 
+        // ensures the initial icons appear correctly within the login form.
+        feather.replace();
+    });
+</script>
+{% endblock %}

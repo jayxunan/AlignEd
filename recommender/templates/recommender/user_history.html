@@ -1,0 +1,54 @@
+{% extends 'recommender/base.html' %}
+
+{% block title %}My Assessment History{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">My Assessment History</h1>
+    <p class="text-gray-500 mt-1">Review your past recommendations, feedback, and raw answers.</p>
+</header>
+
+<div class="bg-white p-6 rounded-2xl shadow-lg">
+    {% if assessments %}
+        <div class="space-y-4">
+            {% for assessment in assessments %}
+            <div class="border rounded-lg p-5 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs text-gray-500">{{ assessment.timestamp|date:"F d, Y, h:i A" }}</p>
+                        <h2 class="text-xl font-semibold text-indigo-700 mt-1">
+                            Recommended: {{ assessment.recommended_course_1 }}
+                            {% if assessment.recommended_course_2 %}(+2 others){% endif %}
+                        </h2>
+                        
+                        <p class="mt-2 text-sm text-gray-600">
+                            Feedback: 
+                            {% if assessment.feedback_submitted %}
+                                Main Match: {{ assessment.feedback_rating_1 }}/5
+                            {% else %}
+                                <span class="text-red-500">Feedback Pending</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        {# Button to view detailed answers #}
+                        <a href="{% url 'user_assessment_detail' assessment.id %}" class="bg-indigo-500 text-white font-medium py-1 px-3 rounded-lg text-sm hover:bg-indigo-600 transition-colors text-center">
+                            View My Answers
+                        </a>
+                        {# Button to re-view the results page #}
+                        <a href="{% url 'recommendation_result_with_id' assessment.id %}" class="bg-gray-200 text-gray-700 font-medium py-1 px-3 rounded-lg text-sm hover:bg-gray-300 transition-colors text-center">
+                            Re-View Results
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-500 p-10">You have not completed any assessments yet.</p>
+        <div class="text-center">
+            <a href="{% url 'assessment' %}" class="text-indigo-600 hover:text-indigo-800 font-medium">Start your first assessment now!</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

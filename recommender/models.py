@@ -1,6 +1,25 @@
 # recommender/models.py
 
 from django.db import models
+from django.contrib.auth.models import User
+
+STRAND_CHOICES = [
+    ('STEM', 'STEM'), ('ABM', 'ABM'), ('HUMSS', 'HUMSS'), ('GAS', 'GAS'), ('TVL', 'TVL'),
+]
+YEAR_LEVEL_CHOICES = [
+    ('11', 'Grade 11'), ('12', 'Grade 12'),
+]
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, blank=True)
+    age = models.IntegerField(null=True, blank=True)
+    strand = models.CharField(max_length=50, choices=STRAND_CHOICES, default='COLLEGE')
+    university = models.CharField(max_length=200, blank=True, verbose_name="School/University")
+    year_level = models.CharField(max_length=10, choices=YEAR_LEVEL_CHOICES, default='1')
+
+    def __str__(self):
+        return self.user.username
 
 FIELD_CHOICES = [
     ('TECH', 'Technology, Computing, & Data'),
@@ -33,7 +52,7 @@ class PersonaTemplate(models.Model):
 class CoursePersonaWeight(models.Model):
     course = models.ForeignKey('Course', 
                                on_delete=models.CASCADE, 
-                               related_name='weights') 
+                               related_name='weights')
                                
     persona_template = models.ForeignKey(PersonaTemplate, on_delete=models.CASCADE)
     weight_factor = models.IntegerField(default=1, help_text="Weight (1-5) to multiply this persona's influence.")
@@ -71,44 +90,83 @@ class Course(models.Model):
         return self.name
 
 class Assessment(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Student Name (Optional)")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='assessments')
+    display_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Student Name (Snapshot)")
     school = models.CharField(max_length=200, verbose_name="School/University")
     shs_strand = models.CharField(max_length=50, verbose_name="SHS Strand")
     tvl_strand = models.CharField(max_length=50, blank=True, null=True, verbose_name="TVL Strand")
+    
     base_persona_key = models.CharField(
         max_length=100, 
         default='Computer Science', 
-        help_text="pls."
+        help_text="Internal key for the base persona, if applicable."
     )
-    
     custom_trait_scores = models.TextField(
         blank=True, 
-        help_text="change value."
+        help_text="Raw input data from assessment."
     )
     
-    interest_science = models.IntegerField(default=0)
+    # -------------------------------------------------------------
+    # ASSESSMENT FIELDS (TOTAL 50 FIELDS)
+    # -------------------------------------------------------------
+
+    ## 1. INTERESTS (25 Fields)
+    interest_research = models.IntegerField(default=0)
     interest_arts = models.IntegerField(default=0)
-    interest_teaching = models.IntegerField(default=0)
-    interest_business = models.IntegerField(default=0)
-    interest_tech = models.IntegerField(default=0)
+    interest_policy = models.IntegerField(default=0)
     interest_design = models.IntegerField(default=0)
-    interest_sports = models.IntegerField(default=0)
+    interest_tech = models.IntegerField(default=0)
     interest_building = models.IntegerField(default=0)
     interest_nature = models.IntegerField(default=0)
+    interest_detail = models.IntegerField(default=0)
     interest_leading = models.IntegerField(default=0)
     interest_helping = models.IntegerField(default=0)
-    interest_detail = models.IntegerField(default=0)
-    interest_policy = models.IntegerField(default=0)
-    interest_research = models.IntegerField(default=0)
+    interest_tools = models.IntegerField(default=0)
+    interest_analysis = models.IntegerField(default=0)
+    interest_writing = models.IntegerField(default=0)
+    interest_performing = models.IntegerField(default=0)
+    interest_health_care = models.IntegerField(default=0)
+    interest_finance = models.IntegerField(default=0)
+    interest_sales = models.IntegerField(default=0)
+    interest_education = models.IntegerField(default=0)
+    interest_management = models.IntegerField(default=0)
+    interest_marketing = models.IntegerField(default=0)
+    interest_performing_arts = models.IntegerField(default=0) 
+    interest_counseling = models.IntegerField(default=0)
+    interest_social_service = models.IntegerField(default=0)
+    interest_legal = models.IntegerField(default=0)
+    interest_business = models.IntegerField(default=0)
 
-    # Ability fields
     ability_logic = models.IntegerField(default=0)
     ability_creativity = models.IntegerField(default=0)
-    ability_comm = models.IntegerField(default=0)
+    ability_comm = models.IntegerField(default=0) 
     ability_practical = models.IntegerField(default=0)
     ability_teamwork = models.IntegerField(default=0)
     ability_spatial = models.IntegerField(default=0)
-    
+    ability_numerical = models.IntegerField(default=0)
+    ability_abstract_reason = models.IntegerField(default=0)
+    ability_verbal_comp = models.IntegerField(default=0)
+    ability_clerical = models.IntegerField(default=0)
+    ability_mech_reason = models.IntegerField(default=0)
+    ability_organization = models.IntegerField(default=0)
+    ability_detailcheck = models.IntegerField(default=0)
+    ability_comprehension = models.IntegerField(default=0)
+    ability_problem_solve = models.IntegerField(default=0) 
+
+    dmgt_resilience = models.IntegerField(default=0)
+    dmgt_persistence = models.IntegerField(default=0) 
+    dmgt_self_manage = models.IntegerField(default=0)
+    dmgt_patience = models.IntegerField(default=0)
+    dmgt_flexibility = models.IntegerField(default=0) 
+    dmgt_integrity = models.IntegerField(default=0) 
+    dmgt_stress_manage = models.IntegerField(default=0) 
+    dmgt_initiative = models.IntegerField(default=0) 
+    ability_comm_written = models.IntegerField(default=0) 
+    ability_negotiation = models.IntegerField(default=0) 
+
+    # -------------------------------------------------------------
+    # RECOMMENDATION & FEEDBACK (Remains the same)
+    # -------------------------------------------------------------
     recommended_course_1 = models.CharField(max_length=200, blank=True)
     recommended_course_2 = models.CharField(max_length=200, blank=True)
     recommended_course_3 = models.CharField(max_length=200, blank=True)
@@ -118,5 +176,16 @@ class Assessment(models.Model):
     feedback_submitted = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    last_completed_step = models.IntegerField(default=0)
+
     def __str__(self):
-        return f"Assessment for {self.name or 'Anonymous'} from {self.school}"
+        return f"Assessment for {self.display_name or 'Anonymous'} (User ID: {self.user_id})"
+
+class ProfileChangeToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    pending_data = models.JSONField() 
+    verification_code = models.CharField(max_length=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Token for {self.user.username}"

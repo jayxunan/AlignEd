@@ -3,6 +3,7 @@
     <span>AlignEd</span>
 </div>
 
+{# Check if the user is a Superuser (Admin) #}
 {% if user.is_authenticated and user.is_superuser %}
     <nav class="flex-grow">
         <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mb-2">Admin Controls</p>
@@ -15,9 +16,32 @@
         </ul>
         <p class="px-4 text-xs font-semibold uppercase text-indigo-400 mt-6 mb-2">Account</p>
         <ul>
-            <li><a href="{% url 'logout' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="log-out" class="w-5 h-5 mr-3"></i>Logout</a></li>
+            <li><a href="{% url 'admin_logout' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium text-indigo-200"><i data-feather="log-out" class="w-5 h-5 mr-3"></i>Logout (Admin)</a></li>
         </ul>
     </nav>
+
+{# Check if the user is Authenticated (Standard User) #}
+{% elif user.is_authenticated %}
+    <nav class="flex-grow">
+        <ul>
+            <li><a href="{% url 'dashboard' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'dashboard' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="home" class="w-5 h-5 mr-3"></i>Dashboard</a></li>
+            <li><a href="{% url 'assessment' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'assessment' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="edit-3" class="w-5 h-5 mr-3"></i>Take Assessment</a></li>
+            <li><a href="{% url 'user_history' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'user_history' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="clock" class="w-5 h-5 mr-3"></i>My Results History</a></li>
+            <li><a href="{% url 'courses' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'courses' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="book-open" class="w-5 h-5 mr-3"></i>Courses</a></li>
+            <li><a href="{% url 'user_settings' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'user_settings' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="settings" class="w-5 h-5 mr-3"></i>Settings</a></li>
+            <li><a href="{% url 'about' %}" class="sidebar-link flex items-center py-3 px-4 rounded-lg font-medium {% if active_page == 'about' %}active{% else %}text-indigo-200{% endif %}"><i data-feather="info" class="w-5 h-5 mr-3"></i>About</a></li>
+        </ul>
+    </nav>
+    <div class="mt-auto pt-4 border-t border-indigo-700">
+        <p class="text-xs font-semibold uppercase text-indigo-400 mb-2 px-2">Signed in as: {{ user.username }}</p>
+        {# FIX: User Logout Button #}
+        <a href="{% url 'user_logout' %}" class="flex items-center justify-center p-2 text-white bg-red-600 hover:bg-red-700 text-sm font-medium transition-colors rounded-md">
+            <i data-feather="log-out" class="w-4 h-4 mr-2"></i>
+            Logout
+        </a>
+    </div>
+
+{# User is NOT Authenticated (Show Login/Register) #}
 {% else %}
     <nav class="flex-grow">
         <ul>
@@ -28,9 +52,16 @@
         </ul>
     </nav>
     <div class="mt-auto pt-4 border-t border-indigo-700">
-        <a href="{% url 'login' %}" class="flex items-center justify-center p-2 text-indigo-300 hover:text-white text-sm font-medium transition-colors rounded-md hover:bg-indigo-800">
-            <i data-feather="shield" class="w-4 h-4 mr-2"></i>
+        {# User Login Link #}
+        <a href="{% url 'user_login' %}" class="flex items-center justify-center p-2 text-white bg-indigo-600 hover:bg-indigo-700 text-sm font-medium transition-colors rounded-md mt-2">
+        <i data-feather="log-in" class="w-4 h-4 mr-2"></i>
+            User Login / Register
+        </a>
+        {# Admin Login Link #}
+        <a href="{% url 'admin_login' %}" class="flex items-center justify-center p-2 text-indigo-300 hover:text-white text-sm font-medium transition-colors rounded-md hover:bg-indigo-800">
+        <i data-feather="shield" class="w-4 h-4 mr-2"></i>
             Admin Panel
         </a>
+
     </div>
 {% endif %}

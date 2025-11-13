@@ -4,9 +4,33 @@ import pandas as pd
 import numpy as np
 import random
 
-# --- 1. COURSE DEFINITIONS & FIELD MAPPING ---
+# --- 1. MASTER LIST OF ALL 50 ASSESSMENT FIELDS (From models.py update) ---
+# Separated into Interests (25) and Aptitudes/Volitional Traits (25)
+ALL_INTERESTS = [
+    'interest_research', 'interest_arts', 'interest_policy', 'interest_design', 
+    'interest_tech', 'interest_building', 'interest_nature', 'interest_detail',
+    'interest_leading', 'interest_helping', 'interest_tools', 'interest_analysis',
+    'interest_writing', 'interest_performing', 'interest_health_care', 'interest_finance',
+    'interest_sales', 'interest_education', 'interest_management', 'interest_marketing',
+    'interest_performing_arts', 'interest_counseling', 'interest_social_service', 
+    'interest_legal', 'interest_business'
+]
 
-# Define the ten major field categories and list all the new courses within them.
+ALL_APTITUDES_DMGT = [
+    'ability_logic', 'ability_creativity', 'ability_comm', 'ability_practical',
+    'ability_teamwork', 'ability_spatial', 'ability_numerical', 'ability_abstract_reason',
+    'ability_verbal_comp', 'ability_clerical', 'ability_mech_reason', 'ability_organization',
+    'ability_detailcheck', 'ability_comprehension', 'ability_problem_solve',
+    'dmgt_resilience', 'dmgt_persistence', 'dmgt_self_manage', 'dmgt_patience',
+    'dmgt_flexibility', 'dmgt_integrity', 'dmgt_stress_manage', 'dmgt_initiative',
+    'ability_comm_written', 'ability_negotiation'
+]
+
+# Combine for easy iteration
+ALL_TRAITS = ALL_INTERESTS + ALL_APTITUDES_DMGT
+
+# --- 2. COURSE DEFINITIONS & FIELD MAPPING (Retained from original) ---
+
 FIELD_CATEGORIES = {
     'TECH': ['Computer Science', 'Information Technology', 'Information Systems', 'Information Security', 'Game Development', 'Web & Mobile Development', 'Applied Statistics', 'Data Science', 'AI Engineering', 'Technical Communication'],
     'ENG': ['Architecture', 'Interior Design', 'Industrial Design', 'Chemical Engineering', 'Civil Engineering', 'Computer Engineering', 'Electrical Engineering', 'Electronics Engineering', 'Industrial Engineering', 'Mechanical Engineering', 'Environmental & Sanitary Engineering', 'Biological Engineering', 'Energy Engineering', 'Manufacturing Engineering', 'Materials Science & Engineering', 'Geodetic Engineering', 'Metallurgical Engineering', 'Mining Engineering', 'Management Engineering', 'Mechatronics Technology', 'Railway Engineering'],
@@ -24,34 +48,64 @@ FIELD_CATEGORIES = {
 COURSE_TO_FIELD = {course: field for field, courses in FIELD_CATEGORIES.items() for course in courses}
 COURSES = list(COURSE_TO_FIELD.keys()) # All 100+ courses
 
-# --- 2. BASELINE FIELD PROFILES (for Data Generation) ---
-# Define a general interest/ability profile for each broad field.
+
+# --- 3. BASELINE FIELD PROFILES (UPDATED FOR ALL 50 FIELDS) ---
+# Structure: {'INTERESTS': {'trait_name': (low, high)}, 'APTITUDES_DMGT': {'trait_name': (low, high)}, 'SHS': 'strand'}
 
 PROFILES_BY_FIELD = {
-    # Tech/Data requires Logic and Tech interest
-    'TECH': {'interests': {'tech': (5,5), 'science': (4,5), 'building': (3,4)}, 'abilities': {'logic': (5,5), 'practical': (4,5), 'creativity': (3,4)}, 'shs_strand': 'STEM'},
-    # Engineering/Arch requires Building interest, Logic, and Practical ability
-    'ENG': {'interests': {'building': (5,5), 'science': (4,5), 'tech': (3,4)}, 'abilities': {'logic': (5,5), 'practical': (5,5), 'creativity': (4,5)}, 'shs_strand': 'STEM'},
-    # Business requires Business interest, Comm, and Teamwork
-    'BUS': {'interests': {'business': (5,5), 'leading': (4,5), 'science': (2,3)}, 'abilities': {'comm': (5,5), 'teamwork': (4,5), 'logic': (4,5)}, 'shs_strand': 'ABM'},
-    # Health/Science requires Science interest, Helping, and Logic/Practical ability
-    'HEALTH': {'interests': {'helping': (5,5), 'science': (5,5), 'nature': (3,4)}, 'abilities': {'logic': (4,5), 'practical': (4,5), 'comm': (4,5)}, 'shs_strand': 'STEM'},
-    # Social Sciences/Hum requires Helping, Teaching, and Comm/Creativity
-    'SOCIAL': {'interests': {'helping': (5,5), 'teaching': (4,5), 'arts': (3,5)}, 'abilities': {'comm': (5,5), 'creativity': (4,5), 'logic': (3,4)}, 'shs_strand': 'HUMSS'},
-    # Media/Arts requires Arts, Design, and Creativity/Comm
-    'MEDIA': {'interests': {'arts': (5,5), 'design': (5,5), 'tech': (3,4)}, 'abilities': {'creativity': (5,5), 'comm': (4,5), 'practical': (2,3)}, 'shs_strand': 'GAS'},
-    # Education requires Teaching, Helping, Comm, and Teamwork
-    'EDUC': {'interests': {'teaching': (5,5), 'helping': (4,5), 'science': (1,2)}, 'abilities': {'comm': (5,5), 'teamwork': (4,5), 'creativity': (3,4)}, 'shs_strand': 'HUMSS'},
-    # Public Service requires Leading, Helping, and Comm
-    'PUB': {'interests': {'leading': (5,5), 'helping': (4,5), 'business': (3,4)}, 'abilities': {'comm': (5,5), 'logic': (4,5), 'teamwork': (4,5)}, 'shs_strand': 'HUMSS'},
-    # Hospitality requires Helping, Teamwork, and Comm
-    'HOSP': {'interests': {'helping': (5,5), 'leading': (4,5), 'business': (3,4)}, 'abilities': {'teamwork': (5,5), 'comm': (5,5), 'practical': (3,4)}, 'shs_strand': 'HESS'}, # Using HESS for specific SHS Strand
-    # Applied/Vocational requires Building, Tech, and Practical ability
-    'APPLIED': {'interests': {'building': (5,5), 'tech': (4,5), 'sports': (3,4)}, 'abilities': {'practical': (5,5), 'logic': (3,4), 'teamwork': (4,5)}, 'shs_strand': 'TVL'},
+    'TECH': {
+        'INTERESTS': {'interest_tech': (5,5), 'interest_research': (4,5), 'interest_analysis': (4,5), 'interest_building': (3,4), 'interest_design': (3,4)},
+        'APTITUDES_DMGT': {'ability_logic': (5,5), 'ability_numerical': (4,5), 'ability_abstract_reason': (4,5), 'ability_detailcheck': (4,5), 'dmgt_persistence': (4,5)},
+        'SHS': 'STEM'
+    },
+    'ENG': {
+        'INTERESTS': {'interest_building': (5,5), 'interest_tools': (4,5), 'interest_research': (4,5), 'interest_tech': (3,4)},
+        'APTITUDES_DMGT': {'ability_practical': (5,5), 'ability_logic': (5,5), 'ability_numerical': (4,5), 'ability_mech_reason': (5,5), 'ability_spatial': (4,5), 'ability_teamwork': (4,5)},
+        'SHS': 'STEM'
+    },
+    'BUS': {
+        'INTERESTS': {'interest_business': (5,5), 'interest_finance': (5,5), 'interest_leading': (4,5), 'interest_management': (5,5), 'interest_detail': (4,5)},
+        'APTITUDES_DMGT': {'ability_logic': (4,5), 'ability_numerical': (4,5), 'ability_organization': (4,5), 'ability_comm': (3,4), 'dmgt_integrity': (4,5), 'ability_negotiation': (4,5)},
+        'SHS': 'ABM'
+    },
+    'HEALTH': {
+        'INTERESTS': {'interest_health_care': (5,5), 'interest_helping': (5,5), 'interest_research': (4,5), 'interest_nature': (3,4)},
+        'APTITUDES_DMGT': {'ability_logic': (4,5), 'ability_verbal_comp': (4,5), 'ability_practical': (3,4), 'ability_detailcheck': (4,5), 'dmgt_patience': (5,5), 'dmgt_resilience': (4,5)},
+        'SHS': 'STEM'
+    },
+    'SOCIAL': {
+        'INTERESTS': {'interest_policy': (5,5), 'interest_research': (4,5), 'interest_helping': (4,5), 'interest_legal': (3,4)},
+        'APTITUDES_DMGT': {'ability_comm': (5,5), 'ability_verbal_comp': (4,5), 'ability_logic': (3,4), 'ability_comprehension': (4,5), 'ability_teamwork': (4,5), 'dmgt_flexibility': (4,5)},
+        'SHS': 'HUMSS'
+    },
+    'MEDIA': {
+        'INTERESTS': {'interest_arts': (5,5), 'interest_design': (5,5), 'interest_writing': (5,5), 'interest_performing_arts': (4,5), 'interest_marketing': (4,5)},
+        'APTITUDES_DMGT': {'ability_creativity': (5,5), 'ability_comm': (5,5), 'ability_comm_written': (4,5), 'ability_teamwork': (3,4), 'dmgt_initiative': (4,5)},
+        'SHS': 'GAS'
+    },
+    'EDUC': {
+        'INTERESTS': {'interest_education': (5,5), 'interest_helping': (4,5), 'interest_counseling': (4,5)},
+        'APTITUDES_DMGT': {'ability_comm': (5,5), 'ability_teamwork': (5,5), 'dmgt_patience': (5,5), 'ability_creativity': (3,4), 'dmgt_self_manage': (4,5)},
+        'SHS': 'HUMSS'
+    },
+    'PUB': {
+        'INTERESTS': {'interest_policy': (5,5), 'interest_leading': (5,5), 'interest_social_service': (4,5), 'interest_helping': (4,5)},
+        'APTITUDES_DMGT': {'ability_organization': (5,5), 'ability_comm': (4,5), 'ability_teamwork': (4,5), 'dmgt_integrity': (4,5), 'ability_logic': (4,5)},
+        'SHS': 'HUMSS'
+    },
+    'HOSP': {
+        'INTERESTS': {'interest_helping': (5,5), 'interest_management': (4,5), 'interest_business': (3,4)},
+        'APTITUDES_DMGT': {'ability_teamwork': (5,5), 'ability_comm': (5,5), 'ability_practical': (4,5), 'ability_organization': (5,5), 'dmgt_stress_manage': (4,5)},
+        'SHS': 'GAS'
+    },
+    'APPLIED': {
+        'INTERESTS': {'interest_building': (5,5), 'interest_tools': (4,5), 'interest_tech': (4,5), 'interest_nature': (3,4)},
+        'APTITUDES_DMGT': {'ability_practical': (5,5), 'ability_mech_reason': (5,5), 'ability_spatial': (4,5), 'ability_logic': (3,4)},
+        'SHS': 'TVL'
+    },
 }
 
-
-# --- 3. GENERATION LOGIC ---
+# --- 4. GENERATION LOGIC (Updated) ---
 
 def generate_row_for_course(course):
     field_category = COURSE_TO_FIELD.get(course)
@@ -60,30 +114,32 @@ def generate_row_for_course(course):
         
     profile = PROFILES_BY_FIELD[field_category]
 
-    # Map SHS strand from the profile
-    strand = profile.get('shs_strand', 'GAS')
+    # Map SHS strand and set TVL strand
+    strand = profile.get('SHS', 'GAS')
+    tvl_strand = 'ICT' if strand == "TVL" else 'none'
 
-    # --- CRITICAL CHANGE: ADD THE NEW 'field_category' COLUMN ---
-    row = {'shs_strand': strand, 'tvl_strand': 'ICT' if strand == "TVL" else 'none', 'course': course, 'field_category': field_category}
+    # Initialize row with core data and the new field_category
+    row = {'shs_strand': strand, 'tvl_strand': tvl_strand, 'course': course, 'field_category': field_category}
 
-    # Define all possible interests and abilities for data consistency
-    all_interests = ['science', 'arts', 'teaching', 'business', 'tech', 'design', 'sports', 'building', 'nature', 'leading', 'helping']
-    all_abilities = ['logic', 'creativity', 'comm', 'practical', 'teamwork']
-
-    # Generate ratings based on the field's baseline profile
-    for i in all_interests:
+    # Generate ratings for all 50 traits
+    
+    # 1. Interests (25)
+    for i in ALL_INTERESTS:
         # Default to a middle-low range (1, 3) if not explicitly set in the field profile
-        low, high = profile['interests'].get(i, (1, 3))
-        row[f'interest_{i}'] = random.randint(low, high)
-    for a in all_abilities:
-        low, high = profile['abilities'].get(a, (1, 3))
-        row[f'ability_{a}'] = random.randint(low, high)
+        low, high = profile['INTERESTS'].get(i, (1, 3))
+        row[i] = random.randint(low, high)
+        
+    # 2. Aptitudes & DMGT (25)
+    for a in ALL_APTITUDES_DMGT:
+        # Default to a middle-low range (1, 3) if not explicitly set in the field profile
+        low, high = profile['APTITUDES_DMGT'].get(a, (1, 3))
+        row[a] = random.randint(low, high)
         
     return row
 
 if __name__ == "__main__":
     # --- Bias Mitigation Implemented Here: Equal rows per course ---
-    NUM_ROWS_PER_COURSE = 20 # Lowered from 60 to manage file size, but still ensures balance
+    NUM_ROWS_PER_COURSE = 60 # Set back to 60 for better training data size
     total_rows = len(COURSES) * NUM_ROWS_PER_COURSE
     
     print(f"Starting data generation for the expanded list of {len(COURSES)} courses.")
@@ -95,6 +151,11 @@ if __name__ == "__main__":
             all_data.append(generate_row_for_course(course))
 
     df = pd.DataFrame([data for data in all_data if data is not None])
+
+    # Ensure all 50 columns are present, even if some rows didn't naturally generate them (fill missing with 1)
+    for trait in ALL_TRAITS:
+        if trait not in df.columns:
+            df[trait] = 1 # Initialize missing columns
 
     # Shuffle the dataset to mix everything up
     df = df.sample(frac=1).reset_index(drop=True)

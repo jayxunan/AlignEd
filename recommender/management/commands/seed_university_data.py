@@ -1,5 +1,3 @@
-# recommender/management/commands/seed_university_data.py
-
 from django.core.management.base import BaseCommand
 from recommender.models import Course, University
 from django.db import transaction
@@ -7,22 +5,30 @@ import os
 
 # --- 1. Define the 12 Universities (University Model Data) ---
 UNIVERSITY_LIST = [
-    "University of the Philippines (UP)",
-    "De La Salle University (DLSU)",
-    "University of Santo Tomas (UST)",
-    "Polytechnic University of the Philippines (PUP)",
-    "Mapúa University",
-    "Adamson University",
-    "Lyceum of the Philippines University (LPU)",
-    "University of the East (UE)",
-    "Far Eastern University (FEU)",
-    "Philippine Normal University (PNU)",
-    "Technological University of the Philippines (TUP)",
+    "University of the Philippines (UP)", "De La Salle University (DLSU)", 
+    "University of Santo Tomas (UST)", "Polytechnic University of the Philippines (PUP)",
+    "Mapúa University", "Adamson University", "Lyceum of the Philippines University (LPU)",
+    "University of the East (UE)", "Far Eastern University (FEU)", 
+    "Philippine Normal University (PNU)", "Technological University of the Philippines (TUP)",
     "STI College",
 ]
 
+# --- NEW: Descriptive text for universities ---
+UNI_DESCRIPTIONS = {
+    "University of the Philippines (UP)": "The national university, known for academic excellence, extensive research, and public service. Admission is highly competitive via the UPCAT or a combination of GWA/tests. Tuition is generally free or heavily subsidized.",
+    "De La Salle University (DLSU)": "A leading private Catholic institution specializing in engineering, business, and computer science. Known for its rigorous academic standards and strong research output.",
+    "University of Santo Tomas (UST)": "The oldest university in Asia, offering strong programs in medicine, architecture, and the liberal arts. Known for its large campus and cultural heritage.",
+    "Polytechnic University of the Philippines (PUP)": "A public, non-sectarian university known for affordable tuition and strong programs in engineering, accountancy, and business. Highly accessible and one of the largest student bodies.",
+    "Mapúa University": "A premiere technological university famous for its engineering and IT programs. Known for its quarterm system and focus on hands-on technical education.",
+    "Adamson University": "A Catholic university known for its programs in engineering, sciences, and business. Offers competitive admission standards and a wide range of degrees.",
+    "Lyceum of the Philippines University (LPU)": "Known primarily for its excellent programs in hospitality, tourism, and communication arts. A dynamic private institution with a growing presence.",
+    "University of the East (UE)": "Offers robust programs in Accountancy, Business, and Computer Studies. A large private university known for accessible education.",
+    "Far Eastern University (FEU)": "Known for its distinguished programs in business, nursing, and architecture. Offers a mix of modern and historical architecture on its Manila campus.",
+    "Philippine Normal University (PNU)": "The center for teacher education and specialized courses in education and arts. Highly regarded for training future educators.",
+    "Technological University of the Philippines (TUP)": "A state university focused entirely on technological education and applied arts. Provides practical and hands-on skills training.",
+    "STI College": "A private college chain focusing on IT, business administration, and hospitality management. Known for technology-driven education and quick industry integration.",
+}
 # --- 2. Define Final Cleaned Courses and their Field/University Mapping ---
-# The list has been adjusted to use the final 85 names provided.
 COURSE_DATA = {
     # -----------------------------------------------------
     # TECH (T) - High Logic, Tech, Detail
@@ -34,7 +40,7 @@ COURSE_DATA = {
     'Web & Mobile Development': ('TECH', ['UST']),
     'Game Design & Development': ('TECH', ['UST', 'LPU']),
     'Data Science & Analytics': ('TECH', ['DLSU', 'FEU', 'LPU']),
-    'Data Science': ('TECH', ['DLSU']), # Kept separate for clarity
+    'Data Science': ('TECH', ['DLSU']),
     'Actuarial Science': ('TECH', ['UST', 'DLSU']),
     'Business Analytics': ('TECH', ['UST', 'DLSU']),
     'Applied Mathematics': ('TECH', ['UP', 'PUP', 'FEU', 'PNU']),
@@ -59,15 +65,18 @@ COURSE_DATA = {
     # -----------------------------------------------------
     # HEALTH/SCIENCE (H) - High Research, Science, Helping
     # -----------------------------------------------------
-    'Medicine': ('HEALTH', ['UST']), 
-    'Dentistry': ('HEALTH', ['UST']), 
+    'Medicine': ('HEALTH', ['UST']),
+    'Dentistry': ('HEALTH', ['UST']),
     'Nursing': ('HEALTH', ['UP', 'UST', 'Adamson', 'FEU']),
     'Medical Technology': ('HEALTH', ['UST', 'FEU']),
     'Pharmaceutical Sciences': ('HEALTH', ['UST', 'Adamson', 'FEU']),
     'Nutrition & Dietetics': ('HEALTH', ['UP', 'PUP', 'UST', 'FEU', 'PNU']),
     'Clinical Audiology': ('HEALTH', ['UST']),
     'Clinical Pharmacy': ('HEALTH', ['UST']),
-    'Health Professions': ('HEALTH', ['UST']), # Used for general BSHS, PT, OT, SLP
+    
+    # FIX: Restoring generic entry that covers BSHS/PT/OT to stabilize count
+    'Health Professions': ('HEALTH', ['UST', 'DLSU', 'UP', 'FEU']), # Consolidated entry (PT/OT/BSHS)
+    
     'Human Biology': ('HEALTH', ['DLSU']),
     'Biology': ('HEALTH', ['UP', 'PUP', 'DLSU', 'UST', 'Adamson', 'FEU', 'PNU']),
     'Biochemistry': ('HEALTH', ['DLSU', 'UST', 'Adamson', 'FEU']),
@@ -145,23 +154,18 @@ COURSE_DATA = {
     'Industrial Arts': ('APPLIED', ['PUP', 'TUP']),
 }
 
+
 class Command(BaseCommand):
     help = 'Seeds the database with final University and Course data, and links them.'
 
     def handle(self, *args, **options):
         UNI_CODE_MAP = {
-            "UP": "University of the Philippines (UP)",
-            "DLSU": "De La Salle University (DLSU)",
-            "UST": "University of Santo Tomas (UST)",
-            "PUP": "Polytechnic University of the Philippines (PUP)",
-            "Mapúa": "Mapúa University",
-            "Adamson": "Adamson University",
-            "LPU": "Lyceum of the Philippines University (LPU)",
-            "UE": "University of the East (UE)",
-            "FEU": "Far Eastern University (FEU)",
-            "PNU": "Philippine Normal University (PNU)",
-            "TUP": "Technological University of the Philippines (TUP)",
-            "STI": "STI College",
+            "UP": "University of the Philippines (UP)", "DLSU": "De La Salle University (DLSU)",
+            "UST": "University of Santo Tomas (UST)", "PUP": "Polytechnic University of the Philippines (PUP)",
+            "Mapúa": "Mapúa University", "Adamson": "Adamson University", 
+            "LPU": "Lyceum of the Philippines University (LPU)", "UE": "University of the East (UE)",
+            "FEU": "Far Eastern University (FEU)", "PNU": "Philippine Normal University (PNU)", 
+            "TUP": "Technological University of the Philippines (TUP)", "STI": "STI College",
         }
         
         self.stdout.write(self.style.NOTICE("--- Starting FINAL Database Seeding for AlignEd ---"))
@@ -172,10 +176,16 @@ class Command(BaseCommand):
                 self.stdout.write("1. Seeding Universities...")
                 uni_objects = {}
                 for code, uni_name in UNI_CODE_MAP.items():
-                    uni, created = University.objects.get_or_create(name=uni_name)
+                    # FIX: Use update_or_create to set the description on every run
+                    uni, created = University.objects.update_or_create(
+                        name=uni_name,
+                        defaults={
+                            'description': UNI_DESCRIPTIONS.get(uni_name, "No detailed information available for this university.") 
+                        }
+                    )
                     uni_objects[code] = uni 
                 
-                self.stdout.write(self.style.SUCCESS(f"   -> {len(uni_objects)} Universities confirmed."))
+                self.stdout.write(self.style.SUCCESS(f"    -> {len(uni_objects)} Universities confirmed and updated."))
 
                 self.stdout.write("\n2. Seeding FINAL Courses and creating links...")
                 courses_added = 0
@@ -188,7 +198,6 @@ class Command(BaseCommand):
                         name=course_name,
                         defaults={
                             'field_category': field_code,
-                            # Simple generic description based on field
                             'description': f"A major program emphasizing core concepts and professional application in the field of {course_name} (Category: {field_code}).",
                             'icon': 'book-open' 
                         }
@@ -204,11 +213,11 @@ class Command(BaseCommand):
                             course.offering_universities.add(uni_objects[uni_code])
                             links_created += 1
                         else:
-                            self.stdout.write(self.style.WARNING(f"   -> WARNING: University code '{uni_code}' not found for {course_name}."))
+                            self.stdout.write(self.style.WARNING(f"    -> WARNING: University code '{uni_code}' not found for {course_name}."))
 
-                self.stdout.write(self.style.SUCCESS(f"   -> Courses processed: {len(COURSE_DATA)}"))
-                self.stdout.write(self.style.SUCCESS(f"   -> New courses added: {courses_added}"))
-                self.stdout.write(self.style.SUCCESS(f"   -> Total links created: {links_created}"))
+                self.stdout.write(self.style.SUCCESS(f"    -> Courses processed: {len(COURSE_DATA)}"))
+                self.stdout.write(self.style.SUCCESS(f"    -> New courses added: {courses_added}"))
+                self.stdout.write(self.style.SUCCESS(f"    -> Total links created: {links_created}"))
 
                 self.stdout.write(self.style.SUCCESS("\nDatabase seeding complete!"))
 
